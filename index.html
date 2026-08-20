@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Delivery Schedule Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="max-w-5xl mx-auto p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">📦 ระบบจัดการคิวส่งงาน (GitHub Sync & Status)</h1>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
+            <h2 class="text-sm font-semibold text-gray-600 mb-3">ตั้งค่าการเชื่อมต่อ GitHub</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input type="text" id="repoOwner" placeholder="GitHub Username / Org" class="border p-2 rounded text-sm">
+                <input type="text" id="repoName" placeholder="Repository Name" class="border p-2 rounded text-sm">
+                <input type="text" id="filePath" placeholder="File Path (เช่น schedule.json)" value="schedule.json" class="border p-2 rounded text-sm">
+                <input type="password" id="githubToken" placeholder="GitHub Personal Access Token (PAT)" class="border p-2 rounded text-sm">
+            </div>
+            <button onclick="loadData()" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition">เชื่อมต่อและโหลดข้อมูล</button>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
+            <h2 id="formTitle" class="text-sm font-semibold text-gray-600 mb-3">เพิ่มคิวส่งงานใหม่</h2>
+            <input type="hidden" id="editIndex" value="-1">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <input type="text" id="customerName" placeholder="ชื่อลูกค้า / งาน" class="border p-2 rounded text-sm">
+                <input type="date" id="deliveryDate" class="border p-2 rounded text-sm">
+                <select id="deliveryStatus" class="border p-2 rounded text-sm bg-white">
+                    <option value="🔥 กำลังทำ">🔥 กำลังทำ</option>
+                    <option value="⏳ รอดำเนินการ">⏳ รอดำเนินการ</option>
+                    <option value="👍 Approved">👍 Approved</option>
+                    <option value="✅ เสร็จสิ้น">✅ เสร็จสิ้น</option>
+                </select>
+                <input type="text" id="deliveryDetails" placeholder="รายละเอียด / หมายเหตุ" class="border p-2 rounded text-sm">
+            </div>
+            <div class="mt-3 flex gap-2">
+                <button onclick="saveItem()" id="saveBtn" class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition">บันทึกคิวงานลง GitHub</button>
+                <button onclick="resetForm()" id="cancelBtn" class="hidden bg-gray-400 text-white px-4 py-2 rounded text-sm hover:bg-gray-500 transition">ยกเลิกการแก้ไข</button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider">
+                        <th class="p-3">ลูกค้า / งาน</th>
+                        <th class="p-3">วันที่ส่ง</th>
+                        <th class="p-3">สถานะ</th>
+                        <th class="p-3">รายละเอียด</th>
+                        <th class="p-3 text-center">จัดลำดับ</th>
+                        <th class="p-3 text-center">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleTable" class="divide-y divide-gray-100 text-sm">
+                    <tr><td colspan="6" class="p-4 text-center text-gray-400">ยังไม่ได้โหลดข้อมูล กรุณาใส่ค่า Config ด้านบน</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let fileSha = "";
+        let scheduleData = [];
+
+        async function loadData() {
+            const owner = document.getElementById('repoOwner').value;
+            const repo = document.getElementById('repoName').value;
+            const path = document.getElementById('filePath').value;
+            const token = document.getElementById('githubToken').value;
+
+            if (!owner || !repo || !token) {
+                alert("กรุณากรอกข้อมูล GitHub Configuration ให้ครบถ้วน");
+                return;
+            }
+
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+            
+            try {
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `token ${token}` }
+                });
+
+                if (!response.ok) throw new Error("ไม่สามารถโหลดไฟล์จาก GitHub ได้ (ตรวจสอบชื่อไฟล์หรือสิทธิ์ Token)");
+
+                const data = await response.json();
+                fileSha = data.sha;
+                const decodedContent = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+                scheduleData = Array.isArray(decodedContent) ? decodedContent : [];
+                renderTable();
+                alert("โหลดข้อมูลสำเร็จ!");
+            } catch (error) {
+                alert("เกิดข้อผิดพลาด: " + error.message);
+            }
+        }
+
+        async function saveDataToGitHub() {
+            const owner = document.getElementById('repoOwner').value;
+            const repo = document.getElementById('repoName').value;
+            const path = document.getElementById('filePath').value;
+            const token = document.getElementById('githubToken').value;
+
+            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+            const contentEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(scheduleData, null, 2))));
+
+            const body = {
+                message: "Update delivery schedule via Web App",
+                content: contentEncoded,
+                sha: fileSha
+            };
+
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.message);
+            }
+
+            const resData = await response.json();
+            fileSha = resData.content.sha;
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('scheduleTable');
+            if (scheduleData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">ไม่มีรายการคิวส่งงาน</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = scheduleData.map((item, index) => {
+                let badgeColor = "bg-gray-100 text-gray-700";
+                if (item.status === "🔥 กำลังทำ") badgeColor = "bg-orange-100 text-orange-700 font-semibold";
+                if (item.status === "⏳ รอดำเนินการ") badgeColor = "bg-yellow-100 text-yellow-700";
+                if (item.status === "👍 Approved") badgeColor = "bg-blue-100 text-blue-700 font-semibold";
+                if (item.status === "✅ เสร็จสิ้น") badgeColor = "bg-green-100 text-green-700";
+
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-3 font-medium text-gray-800">${item.customer}</td>
+                        <td class="p-3 text-gray-600">${item.date}</td>
+                        <td class="p-3"><span class="px-2 py-1 rounded text-xs ${badgeColor}">${item.status || 'รอดำเนินการ'}</span></td>
+                        <td class="p-3 text-gray-600">${item.details}</td>
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="moveItem(${index}, -1)" class="text-gray-500 hover:text-black bg-gray-100 px-2 py-1 rounded text-xs" title="เลื่อนขึ้น">⬆️</button>
+                            <button onclick="moveItem(${index}, 1)" class="text-gray-500 hover:text-black bg-gray-100 px-2 py-1 rounded text-xs" title="เลื่อนลง">⬇️</button>
+                        </td>
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="editItem(${index})" class="text-blue-500 hover:text-blue-700 text-xs bg-blue-50 px-2 py-1 rounded">แก้ไข</button>
+                            <button onclick="deleteItem(${index})" class="text-red-500 hover:text-red-700 text-xs bg-red-50 px-2 py-1 rounded">ลบ</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function saveItem() {
+            const customer = document.getElementById('customerName').value;
+            const date = document.getElementById('deliveryDate').value;
+            const status = document.getElementById('deliveryStatus').value;
+            const details = document.getElementById('deliveryDetails').value;
+            const editIndex = parseInt(document.getElementById('editIndex').value);
+
+            if (!customer || !date) {
+                alert("กรุณากรอกชื่อลูกค้าและวันที่ส่ง");
+                return;
+            }
+
+            if (editIndex === -1) {
+                scheduleData.unshift({ customer, date, status, details });
+            } else {
+                scheduleData[editIndex] = { customer, date, status, details };
+            }
+            
+            try {
+                await saveDataToGitHub();
+                resetForm();
+                renderTable();
+                alert("บันทึกข้อมูลลง GitHub สำเร็จ!");
+            } catch (error) {
+                alert("บันทึกไม่สำเร็จ: " + error.message);
+                loadData();
+            }
+        }
+
+        function editItem(index) {
+            const item = scheduleData[index];
+            document.getElementById('customerName').value = item.customer;
+            document.getElementById('deliveryDate').value = item.date;
+            document.getElementById('deliveryStatus').value = item.status || "⏳ รอดำเนินการ";
+            document.getElementById('deliveryDetails').value = item.details;
+            document.getElementById('editIndex').value = index;
+
+            document.getElementById('formTitle').innerText = "แก้ไขคิวส่งงาน";
+            document.getElementById('saveBtn').innerText = "อัปเดตการแก้ไข";
+            document.getElementById('cancelBtn').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('customerName').value = '';
+            document.getElementById('deliveryDate').value = '';
+            document.getElementById('deliveryStatus').value = '🔥 กำลังทำ';
+            document.getElementById('deliveryDetails').value = '';
+            document.getElementById('editIndex').value = '-1';
+
+            document.getElementById('formTitle').innerText = "เพิ่มคิวส่งงานใหม่";
+            document.getElementById('saveBtn').innerText = "บันทึกคิวงานลง GitHub";
+            document.getElementById('cancelBtn').classList.add('hidden');
+        }
+
+        async function moveItem(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= scheduleData.length) return;
+
+            const temp = scheduleData[index];
+            scheduleData[index] = scheduleData[newIndex];
+            scheduleData[newIndex] = temp;
+
+            try {
+                await saveDataToGitHub();
+                renderTable();
+            } catch (error) {
+                alert("จัดลำดับไม่สำเร็จ: " + error.message);
+                loadData();
+            }
+        }
+
+        async function deleteItem(index) {
+            if (!confirm("ต้องการลบรายการนี้ใช่หรือไม่?")) return;
+            
+            scheduleData.splice(index, 1);
+            try {
+                await saveDataToGitHub();
+                renderTable();
+            } catch (error) {
+                alert("ลบไม่สำเร็จ: " + error.message);
+                loadData();
+            }
+        }
+    </script>
+</body>
+</html>

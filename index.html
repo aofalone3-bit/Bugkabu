@@ -3,29 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Delivery Schedule Manager</title>
+    <title>Delivery Schedule & Review System</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 font-sans">
-    <div class="max-w-5xl mx-auto p-6">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">📦 ระบบจัดการคิวส่งงาน (GitHub Sync & Status)</h1>
+    <div class="max-w-6xl mx-auto p-4 md:p-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">🚀 ระบบจัดการและตรวจคิวส่งงาน (Team & Reviewer Sync)</h1>
+                <p class="text-sm text-gray-500">ซิงค์ข้อมูลแบบเรียลไทม์ผ่าน GitHub สำหรับทีมงานและผู้ตรวจ</p>
+            </div>
+            <button onclick="toggleConfig()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded transition">⚙️ ตั้งค่า GitHub</button>
+        </div>
 
-        <div class="bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
-            <h2 class="text-sm font-semibold text-gray-600 mb-3">ตั้งค่าการเชื่อมต่อ GitHub</h2>
+        <div id="configPanel" class="hidden bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
+            <h2 class="text-sm font-semibold text-gray-600 mb-3">ตั้งค่าการเชื่อมต่อ GitHub (บันทึกอัตโนมัติ)</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <input type="text" id="repoOwner" placeholder="GitHub Username / Org" class="border p-2 rounded text-sm">
                 <input type="text" id="repoName" placeholder="Repository Name" class="border p-2 rounded text-sm">
                 <input type="text" id="filePath" placeholder="File Path (เช่น schedule.json)" value="schedule.json" class="border p-2 rounded text-sm">
                 <input type="password" id="githubToken" placeholder="GitHub Personal Access Token (PAT)" class="border p-2 rounded text-sm">
             </div>
-            <button onclick="loadData()" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition">เชื่อมต่อและโหลดข้อมูล</button>
+            <button onclick="loadData(); toggleConfig();" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition">บันทึกและเชื่อมต่อ</button>
         </div>
 
         <div class="bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
-            <h2 id="formTitle" class="text-sm font-semibold text-gray-600 mb-3">เพิ่มคิวส่งงานใหม่</h2>
+            <h2 id="formTitle" class="text-sm font-semibold text-gray-600 mb-3">➕ เพิ่มคิวส่งงานใหม่</h2>
             <input type="hidden" id="editIndex" value="-1">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <input type="text" id="customerName" placeholder="ชื่อลูกค้า / งาน" class="border p-2 rounded text-sm">
+                <input type="text" id="customerName" placeholder="ชื่อลูกค้า / ชิ้นงาน" class="border p-2 rounded text-sm">
                 <input type="date" id="deliveryDate" class="border p-2 rounded text-sm">
                 <select id="deliveryStatus" class="border p-2 rounded text-sm bg-white">
                     <option value="🔥 กำลังทำ">🔥 กำลังทำ</option>
@@ -33,28 +39,44 @@
                     <option value="👍 Approved">👍 Approved</option>
                     <option value="✅ เสร็จสิ้น">✅ เสร็จสิ้น</option>
                 </select>
-                <input type="text" id="deliveryDetails" placeholder="รายละเอียด / หมายเหตุ" class="border p-2 rounded text-sm">
+                <input type="text" id="deliveryDetails" placeholder="รายละเอียดงาน" class="border p-2 rounded text-sm">
+            </div>
+            <div class="mt-3">
+                <input type="text" id="reviewerFeedback" placeholder="💬 ความเห็น/ข้อเสนอแนะจากผู้ตรวจ (ถ้ามี)" class="w-full border p-2 rounded text-sm bg-yellow-50">
             </div>
             <div class="mt-3 flex gap-2">
-                <button onclick="saveItem()" id="saveBtn" class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition">บันทึกคิวงานลง GitHub</button>
-                <button onclick="resetForm()" id="cancelBtn" class="hidden bg-gray-400 text-white px-4 py-2 rounded text-sm hover:bg-gray-500 transition">ยกเลิกการแก้ไข</button>
+                <button onclick="saveItem()" id="saveBtn" class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition">บันทึกคิวงานลงระบบ</button>
+                <button onclick="resetForm()" id="cancelBtn" class="hidden bg-gray-400 text-white px-4 py-2 rounded text-sm hover:bg-gray-500 transition">ยกเลิก</button>
+                <button onclick="loadData()" class="ml-auto bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded text-sm transition">🔄รีเฟรชข้อมูลล่าสุด</button>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-            <table class="w-full text-left border-collapse">
+        <div class="flex flex-col md:flex-row gap-3 mb-4">
+            <input type="text" id="searchInput" oninput="renderTable()" placeholder="🔍 ค้นหาชื่อลูกค้า หรือรายละเอียด..." class="flex-1 border p-2 rounded-xl text-sm bg-white">
+            <select id="filterStatus" onchange="renderTable()" class="border p-2 rounded-xl text-sm bg-white">
+                <option value="ALL">📌 แสดงทุกสถานะ</option>
+                <option value="🔥 กำลังทำ">🔥 กำลังทำ</option>
+                <option value="⏳ รอดำเนินการ">⏳ รอดำเนินการ</option>
+                <option value="👍 Approved">👍 Approved</option>
+                <option value="✅ เสร็จสิ้น">✅ เสร็จสิ้น</option>
+            </select>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm overflow-x-auto border border-gray-100">
+            <table class="w-full text-left border-collapse min-w-[800px]">
                 <thead>
                     <tr class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider">
                         <th class="p-3">ลูกค้า / งาน</th>
                         <th class="p-3">วันที่ส่ง</th>
                         <th class="p-3">สถานะ</th>
-                        <th class="p-3">รายละเอียด</th>
+                        <th class="p-3">รายละเอียด & ฟีดแบ็กผู้ตรวจ</th>
                         <th class="p-3 text-center">จัดลำดับ</th>
+                        <th class="p-3 text-center">ตรวจงานด่วน</th>
                         <th class="p-3 text-center">จัดการ</th>
                     </tr>
                 </thead>
                 <tbody id="scheduleTable" class="divide-y divide-gray-100 text-sm">
-                    <tr><td colspan="6" class="p-4 text-center text-gray-400">ยังไม่ได้โหลดข้อมูล กรุณาใส่ค่า Config ด้านบน</td></tr>
+                    <tr><td colspan="7" class="p-4 text-center text-gray-400">กำลังโหลดข้อมูล...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -64,16 +86,41 @@
         let fileSha = "";
         let scheduleData = [];
 
+        window.onload = function() {
+            if (localStorage.getItem('gh_owner')) document.getElementById('repoOwner').value = localStorage.getItem('gh_owner');
+            if (localStorage.getItem('gh_repo')) document.getElementById('repoName').value = localStorage.getItem('gh_repo');
+            if (localStorage.getItem('gh_path')) document.getElementById('filePath').value = localStorage.getItem('gh_path');
+            if (localStorage.getItem('gh_token')) document.getElementById('githubToken').value = localStorage.getItem('gh_token');
+
+            if (localStorage.getItem('gh_owner') && localStorage.getItem('gh_repo') && localStorage.getItem('gh_token')) {
+                loadData();
+            } else {
+                document.getElementById('configPanel').classList.remove('hidden');
+                document.getElementById('scheduleTable').innerHTML = `<tr><td colspan="7" class="p-4 text-center text-orange-500">กรุณาคลิกปุ่ม "⚙️ ตั้งค่า GitHub" ด้านบนเพื่อเชื่อมต่อระบบก่อนใช้งาน</td></tr>`;
+            }
+        };
+
+        function toggleConfig() {
+            const panel = document.getElementById('configPanel');
+            panel.classList.toggle('hidden');
+        }
+
         async function loadData() {
-            const owner = document.getElementById('repoOwner').value;
-            const repo = document.getElementById('repoName').value;
-            const path = document.getElementById('filePath').value;
-            const token = document.getElementById('githubToken').value;
+            const owner = document.getElementById('repoOwner').value.trim();
+            const repo = document.getElementById('repoName').value.trim();
+            const path = document.getElementById('filePath').value.trim();
+            const token = document.getElementById('githubToken').value.trim();
 
             if (!owner || !repo || !token) {
                 alert("กรุณากรอกข้อมูล GitHub Configuration ให้ครบถ้วน");
+                document.getElementById('configPanel').classList.remove('hidden');
                 return;
             }
+
+            localStorage.setItem('gh_owner', owner);
+            localStorage.setItem('gh_repo', repo);
+            localStorage.setItem('gh_path', path);
+            localStorage.setItem('gh_token', token);
 
             const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
             
@@ -82,30 +129,37 @@
                     headers: { 'Authorization': `token ${token}` }
                 });
 
-                if (!response.ok) throw new Error("ไม่สามารถโหลดไฟล์จาก GitHub ได้ (ตรวจสอบชื่อไฟล์หรือสิทธิ์ Token)");
+                if (!response.ok) {
+                    if(response.status === 404) {
+                        // ถ้ายังไม่มีไฟล์ ให้สร้างไฟล์เปล่าเริ่มต้นให้อัตโนมัติ
+                        scheduleData = [];
+                        renderTable();
+                        return;
+                    }
+                    throw new Error("ไม่สามารถโหลดไฟล์จาก GitHub ได้ (ตรวจสอบ Token หรือชื่อ Repo)");
+                }
 
                 const data = await response.json();
                 fileSha = data.sha;
                 const decodedContent = JSON.parse(decodeURIComponent(escape(atob(data.content))));
                 scheduleData = Array.isArray(decodedContent) ? decodedContent : [];
                 renderTable();
-                alert("โหลดข้อมูลสำเร็จ!");
             } catch (error) {
-                alert("เกิดข้อผิดพลาด: " + error.message);
+                document.getElementById('scheduleTable').innerHTML = `<tr><td colspan="7" class="p-4 text-center text-red-400">เกิดข้อผิดพลาด: ${error.message}</td></tr>`;
             }
         }
 
         async function saveDataToGitHub() {
-            const owner = document.getElementById('repoOwner').value;
-            const repo = document.getElementById('repoName').value;
-            const path = document.getElementById('filePath').value;
-            const token = document.getElementById('githubToken').value;
+            const owner = document.getElementById('repoOwner').value.trim();
+            const repo = document.getElementById('repoName').value.trim();
+            const path = document.getElementById('filePath').value.trim();
+            const token = document.getElementById('githubToken').value.trim();
 
             const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
             const contentEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(scheduleData, null, 2))));
 
             const body = {
-                message: "Update delivery schedule via Web App",
+                message: "Update schedule & review status via Web App",
                 content: contentEncoded,
                 sha: fileSha
             };
@@ -130,12 +184,28 @@
 
         function renderTable() {
             const tbody = document.getElementById('scheduleTable');
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            const selectedStatus = document.getElementById('filterStatus').value;
+
             if (scheduleData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">ไม่มีรายการคิวส่งงาน</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400">ยังไม่มีรายการคิวส่งงาน</td></tr>`;
                 return;
             }
 
-            tbody.innerHTML = scheduleData.map((item, index) => {
+            // กรองข้อมูลตามคำค้นหาและสถานะ
+            const filtered = scheduleData.map((item, originalIndex) => ({ ...item, originalIndex }))
+                .filter(item => {
+                    const matchKeyword = (item.customer || '').toLowerCase().includes(keyword) || (item.details || '').toLowerCase().includes(keyword);
+                    const matchStatus = selectedStatus === 'ALL' || item.status === selectedStatus;
+                    return matchKeyword && matchStatus;
+                });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400">ไม่พบรายการที่ค้นหา</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((item) => {
                 let badgeColor = "bg-gray-100 text-gray-700";
                 if (item.status === "🔥 กำลังทำ") badgeColor = "bg-orange-100 text-orange-700 font-semibold";
                 if (item.status === "⏳ รอดำเนินการ") badgeColor = "bg-yellow-100 text-yellow-700";
@@ -143,18 +213,24 @@
                 if (item.status === "✅ เสร็จสิ้น") badgeColor = "bg-green-100 text-green-700";
 
                 return `
-                    <tr class="hover:bg-gray-50">
+                    <tr class="hover:bg-gray-50 transition">
                         <td class="p-3 font-medium text-gray-800">${item.customer}</td>
                         <td class="p-3 text-gray-600">${item.date}</td>
-                        <td class="p-3"><span class="px-2 py-1 rounded text-xs ${badgeColor}">${item.status || 'รอดำเนินการ'}</span></td>
-                        <td class="p-3 text-gray-600">${item.details}</td>
-                        <td class="p-3 text-center space-x-1">
-                            <button onclick="moveItem(${index}, -1)" class="text-gray-500 hover:text-black bg-gray-100 px-2 py-1 rounded text-xs" title="เลื่อนขึ้น">⬆️</button>
-                            <button onclick="moveItem(${index}, 1)" class="text-gray-500 hover:text-black bg-gray-100 px-2 py-1 rounded text-xs" title="เลื่อนลง">⬇️</button>
+                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs ${badgeColor}">${item.status || 'รอดำเนินการ'}</span></td>
+                        <td class="p-3 text-gray-600">
+                            <div>${item.details || '-'}</div>
+                            ${item.feedback ? `<div class="text-xs text-blue-600 bg-blue-50 p-1 mt-1 rounded">💬 ความเห็นผู้ตรวจ: ${item.feedback}</div>` : ''}
                         </td>
                         <td class="p-3 text-center space-x-1">
-                            <button onclick="editItem(${index})" class="text-blue-500 hover:text-blue-700 text-xs bg-blue-50 px-2 py-1 rounded">แก้ไข</button>
-                            <button onclick="deleteItem(${index})" class="text-red-500 hover:text-red-700 text-xs bg-red-50 px-2 py-1 rounded">ลบ</button>
+                            <button onclick="moveItem(${item.originalIndex}, -1)" class="text-gray-500 hover:text-black bg-gray-100 px-2 py-1 rounded text-xs" title="เลื่อนขึ้น">⬆️</button>
+                            <button onclick="moveItem(${item.originalIndex}, 1)" class="text-gray-500 hover:text-black bg-gray-100 px-2 py-1 rounded text-xs" title="เลื่อนลง">⬇️</button>
+                        </td>
+                        <td class="p-3 text-center">
+                            <button onclick="quickApprove(${item.originalIndex})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded shadow-sm transition">👍 อนุมัติงาน</button>
+                        </td>
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="editItem(${item.originalIndex})" class="text-blue-500 hover:text-blue-700 text-xs bg-blue-50 px-2.5 py-1 rounded">แก้ไข</button>
+                            <button onclick="deleteItem(${item.originalIndex})" class="text-red-500 hover:text-red-700 text-xs bg-red-50 px-2.5 py-1 rounded">ลบ</button>
                         </td>
                     </tr>
                 `;
@@ -162,10 +238,11 @@
         }
 
         async function saveItem() {
-            const customer = document.getElementById('customerName').value;
+            const customer = document.getElementById('customerName').value.trim();
             const date = document.getElementById('deliveryDate').value;
             const status = document.getElementById('deliveryStatus').value;
-            const details = document.getElementById('deliveryDetails').value;
+            const details = document.getElementById('deliveryDetails').value.trim();
+            const feedback = document.getElementById('reviewerFeedback').value.trim();
             const editIndex = parseInt(document.getElementById('editIndex').value);
 
             if (!customer || !date) {
@@ -174,18 +251,30 @@
             }
 
             if (editIndex === -1) {
-                scheduleData.unshift({ customer, date, status, details });
+                scheduleData.unshift({ customer, date, status, details, feedback });
             } else {
-                scheduleData[editIndex] = { customer, date, status, details };
+                scheduleData[editIndex] = { customer, date, status, details, feedback };
             }
             
             try {
                 await saveDataToGitHub();
                 resetForm();
                 renderTable();
-                alert("บันทึกข้อมูลลง GitHub สำเร็จ!");
+                alert("บันทึกข้อมูลเรียบร้อย!");
             } catch (error) {
                 alert("บันทึกไม่สำเร็จ: " + error.message);
+                loadData();
+            }
+        }
+
+        async function quickApprove(index) {
+            scheduleData[index].status = "👍 Approved";
+            scheduleData[index].feedback = (scheduleData[index].feedback ? scheduleData[index].feedback + " | " : "") + "อนุมัติเรียบร้อย";
+            try {
+                await saveDataToGitHub();
+                renderTable();
+            } catch (error) {
+                alert("อนุมัติไม่สำเร็จ: " + error.message);
                 loadData();
             }
         }
@@ -195,11 +284,12 @@
             document.getElementById('customerName').value = item.customer;
             document.getElementById('deliveryDate').value = item.date;
             document.getElementById('deliveryStatus').value = item.status || "⏳ รอดำเนินการ";
-            document.getElementById('deliveryDetails').value = item.details;
+            document.getElementById('deliveryDetails').value = item.details || '';
+            document.getElementById('reviewerFeedback').value = item.feedback || '';
             document.getElementById('editIndex').value = index;
 
-            document.getElementById('formTitle').innerText = "แก้ไขคิวส่งงาน";
-            document.getElementById('saveBtn').innerText = "อัปเดตการแก้ไข";
+            document.getElementById('formTitle').innerText = "✏️ แก้ไขคิวส่งงาน / ฟีดแบ็ก";
+            document.getElementById('saveBtn').innerText = "อัปเดตข้อมูล";
             document.getElementById('cancelBtn').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -209,10 +299,11 @@
             document.getElementById('deliveryDate').value = '';
             document.getElementById('deliveryStatus').value = '🔥 กำลังทำ';
             document.getElementById('deliveryDetails').value = '';
+            document.getElementById('reviewerFeedback').value = '';
             document.getElementById('editIndex').value = '-1';
 
-            document.getElementById('formTitle').innerText = "เพิ่มคิวส่งงานใหม่";
-            document.getElementById('saveBtn').innerText = "บันทึกคิวงานลง GitHub";
+            document.getElementById('formTitle').innerText = "➕ เพิ่มคิวส่งงานใหม่";
+            document.getElementById('saveBtn').innerText = "บันทึกคิวงานลงระบบ";
             document.getElementById('cancelBtn').classList.add('hidden');
         }
 

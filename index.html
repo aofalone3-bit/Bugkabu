@@ -5,64 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Delivery Schedule & Review System (Pro Edition)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
 </head>
-<body class="bg-gray-50 font-sans">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
     <div class="w-[98%] mx-auto p-4 md:p-6">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+        <!-- Header & Theme Toggle -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800">🚀 ระบบจัดการและตรวจคิวส่งงาน (Pro Workspace)</h1>
-                <p class="text-sm text-gray-500">ซิงค์ข้อมูลแบบเรียลไทม์ผ่าน GitHub สำหรับทีมงานและผู้ตรวจ</p>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">🚀 ระบบจัดการและตรวจคิวส่งงาน (Pro Workspace)</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">ซิงค์ข้อมูลแบบเรียลไทม์ผ่าน GitHub สำหรับทีมงานและผู้ตรวจ</p>
             </div>
-            <button onclick="toggleConfig()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition border">⚙️ ตั้งค่า GitHub</button>
+            <div class="flex items-center gap-2">
+                <button id="themeToggleBtn" onclick="toggleDarkMode()" class="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-3 py-2 rounded-lg transition border dark:border-gray-600 flex items-center gap-1.5">
+                    🌙 โหมดมืด
+                </button>
+                <button onclick="toggleConfig()" class="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-3 py-2 rounded-lg transition border dark:border-gray-600">
+                    ⚙️ ตั้งค่า GitHub
+                </button>
+            </div>
         </div>
 
         <!-- Configuration Panel -->
-        <div id="configPanel" class="hidden bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
-            <h2 class="text-sm font-semibold text-gray-600 mb-3">ตั้งค่าการเชื่อมต่อ GitHub (บันทึกอัตโนมัติ)</h2>
+        <div id="configPanel" class="hidden bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-6 border border-gray-100 dark:border-gray-700 transition-colors">
+            <h2 class="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-3">ตั้งค่าการเชื่อมต่อ GitHub (บันทึกอัตโนมัติ)</h2>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <input type="text" id="repoOwner" placeholder="GitHub Username / Org" class="border p-2 rounded text-sm">
-                <input type="text" id="repoName" placeholder="Repository Name" class="border p-2 rounded text-sm">
-                <input type="text" id="filePath" placeholder="File Path (เช่น schedule.json)" value="schedule.json" class="border p-2 rounded text-sm">
-                <input type="password" id="githubToken" placeholder="GitHub Personal Access Token (PAT)" class="border p-2 rounded text-sm">
+                <input type="text" id="repoOwner" placeholder="GitHub Username / Org" class="border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-2 rounded text-sm">
+                <input type="text" id="repoName" placeholder="Repository Name" class="border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-2 rounded text-sm">
+                <input type="text" id="filePath" placeholder="File Path (เช่น schedule.json)" value="schedule.json" class="border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-2 rounded text-sm">
+                <input type="password" id="githubToken" placeholder="GitHub Personal Access Token (PAT)" class="border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-2 rounded text-sm">
             </div>
-            <button onclick="loadData(); toggleConfig();" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition">บันทึกและเชื่อมต่อ</button>
+            <button onclick="loadData(); toggleConfig();" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition">บันทึกและเชื่อมต่อ</button>
         </div>
 
         <!-- Add / Edit Schedule Form -->
-        <div class="bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
-            <h2 id="formTitle" class="text-sm font-semibold text-gray-700 mb-3">➕ เพิ่มคิวส่งงานใหม่</h2>
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-6 border border-gray-100 dark:border-gray-700 transition-colors">
+            <h2 id="formTitle" class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">➕ เพิ่มคิวส่งงานใหม่</h2>
             <input type="hidden" id="editIndex" value="-1">
             
             <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3">
                 <!-- ชื่อลูกค้า -->
                 <div class="flex flex-col gap-1">
-                    <label class="text-xs text-gray-500 font-medium">ชื่อลูกค้า / ชิ้นงาน</label>
-                    <input type="text" id="customerName" placeholder="ระบุชื่อลูกค้า..." class="border p-2.5 rounded-lg text-sm bg-gray-50 focus:bg-white">
+                    <label class="text-xs text-gray-500 dark:text-gray-400 font-medium">ชื่อลูกค้า / ชิ้นงาน</label>
+                    <input type="text" id="customerName" placeholder="ระบุชื่อลูกค้า..." class="border dark:border-gray-600 p-2.5 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700">
                 </div>
                 <!-- วันรับงาน -->
                 <div class="flex flex-col gap-1">
-                    <label class="text-xs text-gray-500 font-medium">📥 วันรับงาน</label>
-                    <input type="date" id="receiveDate" class="border p-2.5 rounded-lg text-sm bg-gray-50 focus:bg-white">
+                    <label class="text-xs text-gray-500 dark:text-gray-400 font-medium">📥 วันรับงาน</label>
+                    <input type="date" id="receiveDate" class="border dark:border-gray-600 p-2.5 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700">
                 </div>
                 <!-- วันส่งงาน + ติ๊กไม่ได้กำหนด -->
                 <div class="flex flex-col gap-1">
                     <div class="flex justify-between items-center">
-                        <label class="text-xs text-gray-500 font-medium">🏁 วันส่งงาน</label>
-                        <label class="text-xs flex items-center gap-1 cursor-pointer text-gray-600 font-medium">
+                        <label class="text-xs text-gray-500 dark:text-gray-400 font-medium">🏁 วันส่งงาน</label>
+                        <label class="text-xs flex items-center gap-1 cursor-pointer text-gray-600 dark:text-gray-300 font-medium">
                             <input type="checkbox" id="noDeliveryDate" onchange="toggleDeliveryDate(this)" class="rounded"> ไม่ได้กำหนด
                         </label>
                     </div>
-                    <input type="date" id="deliveryDate" class="border p-2.5 rounded-lg text-sm bg-gray-50 focus:bg-white">
+                    <input type="date" id="deliveryDate" class="border dark:border-gray-600 p-2.5 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700">
                 </div>
                 <!-- เวลาส่ง -->
                 <div class="flex flex-col gap-1">
-                    <label class="text-xs text-gray-500 font-medium">⏰ เวลาส่ง</label>
-                    <input type="time" id="deliveryTime" class="border p-2.5 rounded-lg text-sm bg-gray-50 focus:bg-white">
+                    <label class="text-xs text-gray-500 dark:text-gray-400 font-medium">⏰ เวลาส่ง</label>
+                    <input type="time" id="deliveryTime" class="border dark:border-gray-600 p-2.5 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700">
                 </div>
                 <!-- สถานะ -->
                 <div class="flex flex-col gap-1">
-                    <label class="text-xs text-gray-500 font-medium">📌 สถานะงาน</label>
-                    <select id="deliveryStatus" class="border p-2.5 rounded-lg text-sm bg-gray-50 focus:bg-white">
+                    <label class="text-xs text-gray-500 dark:text-gray-400 font-medium">📌 สถานะงาน</label>
+                    <select id="deliveryStatus" class="border dark:border-gray-600 p-2.5 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700">
                         <option value="🔥 กำลังทำ">🔥 กำลังทำ</option>
                         <option value="⏳ รอดำเนินการ">⏳ รอดำเนินการ</option>
                         <option value="👍 Approved">👍 Approved</option>
@@ -73,21 +86,21 @@
 
             <!-- ช่องรายละเอียดงานและฟีดแบ็ก -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                <textarea id="deliveryDetails" rows="2" placeholder="📝 รายละเอียดงาน (สเปกงาน, ลิงก์ไฟล์งาน Google Drive ฯลฯ)" class="border p-2.5 rounded-lg text-sm bg-gray-50 focus:bg-white w-full"></textarea>
-                <textarea id="reviewerFeedback" rows="2" placeholder="💬 ความเห็น/ข้อเสนอแนะจากผู้ตรวจ (ถ้ามี)" class="border p-2.5 rounded-lg text-sm bg-yellow-50 focus:bg-white w-full"></textarea>
+                <textarea id="deliveryDetails" rows="2" placeholder="📝 รายละเอียดงาน (สเปกงาน, ลิงก์ไฟล์งาน Google Drive ฯลฯ)" class="border dark:border-gray-600 p-2.5 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700 w-full"></textarea>
+                <textarea id="reviewerFeedback" rows="2" placeholder="💬 ความเห็น/ข้อเสนอแนะจากผู้ตรวจ (ถ้ามี)" class="border dark:border-gray-600 p-2.5 rounded-lg text-sm bg-yellow-50 dark:bg-yellow-900/30 text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700 w-full"></textarea>
             </div>
 
             <div class="flex gap-2">
                 <button onclick="saveItem()" id="saveBtn" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition shadow-sm">บันทึกคิวงานลงระบบ</button>
                 <button onclick="resetForm()" id="cancelBtn" class="hidden bg-gray-400 hover:bg-gray-500 text-white px-4 py-2.5 rounded-lg text-sm transition">ยกเลิก</button>
-                <button onclick="loadData()" class="ml-auto bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg text-sm transition flex items-center gap-1">🔄 รีเฟรชข้อมูล</button>
+                <button onclick="loadData()" class="ml-auto bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2.5 rounded-lg text-sm transition flex items-center gap-1 border dark:border-gray-600">🔄 รีเฟรชข้อมูล</button>
             </div>
         </div>
 
         <!-- Search & Filter Bar -->
         <div class="flex flex-col md:flex-row gap-3 mb-4">
-            <input type="text" id="searchInput" oninput="renderTable()" placeholder="🔍 ค้นหาชื่อลูกค้า หรือรายละเอียด..." class="flex-1 border p-2.5 rounded-xl text-sm bg-white shadow-sm">
-            <select id="filterStatus" onchange="renderTable()" class="border p-2.5 rounded-xl text-sm bg-white shadow-sm md:w-64">
+            <input type="text" id="searchInput" oninput="renderTable()" placeholder="🔍 ค้นหาชื่อลูกค้า หรือรายละเอียด..." class="flex-1 border dark:border-gray-700 p-2.5 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 shadow-sm transition-colors">
+            <select id="filterStatus" onchange="renderTable()" class="border dark:border-gray-700 p-2.5 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 shadow-sm md:w-64 transition-colors">
                 <option value="ALL">📌 แสดงทุกสถานะ</option>
                 <option value="🔥 กำลังทำ">🔥 กำลังทำ</option>
                 <option value="⏳ รอดำเนินการ">⏳ รอดำเนินการ</option>
@@ -97,10 +110,10 @@
         </div>
 
         <!-- Schedule Table -->
-        <div class="bg-white rounded-xl shadow-sm overflow-x-auto border border-gray-100">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-x-auto border border-gray-100 dark:border-gray-700 transition-colors">
             <table class="w-full text-left border-collapse min-w-[950px]">
                 <thead>
-                    <tr class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider">
+                    <tr class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs uppercase tracking-wider">
                         <th class="p-3.5">ลูกค้า / งาน</th>
                         <th class="p-3.5">กำหนดการ & เวลา</th>
                         <th class="p-3.5">สถานะ</th>
@@ -110,8 +123,8 @@
                         <th class="p-3.5 text-center">จัดการ</th>
                     </tr>
                 </thead>
-                <tbody id="scheduleTable" class="divide-y divide-gray-100 text-sm">
-                    <tr><td colspan="7" class="p-6 text-center text-gray-400">กำลังโหลดข้อมูล...</td></tr>
+                <tbody id="scheduleTable" class="divide-y divide-gray-100 dark:divide-gray-700 text-sm">
+                    <tr><td colspan="7" class="p-6 text-center text-gray-400 dark:text-gray-500">กำลังโหลดข้อมูล...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -122,6 +135,12 @@
         let scheduleData = [];
 
         window.onload = function() {
+            // โหมดมืดเริ่มต้นจาก LocalStorage
+            if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+            updateThemeIcon();
+
             document.getElementById('receiveDate').value = new Date().toISOString().split('T')[0];
 
             if (localStorage.getItem('gh_owner')) document.getElementById('repoOwner').value = localStorage.getItem('gh_owner');
@@ -137,6 +156,22 @@
             }
         };
 
+        function toggleDarkMode() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('themeToggleBtn').innerHTML = isDark ? '☀️ โหมดสว่าง' : '🌙 โหมดมืด';
+        }
+
         function toggleConfig() {
             document.getElementById('configPanel').classList.toggle('hidden');
         }
@@ -146,10 +181,10 @@
             if (cb.checked) {
                 dateInput.value = '';
                 dateInput.disabled = true;
-                dateInput.classList.add('bg-gray-200', 'cursor-not-allowed');
+                dateInput.classList.add('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
             } else {
                 dateInput.disabled = false;
-                dateInput.classList.remove('bg-gray-200', 'cursor-not-allowed');
+                dateInput.classList.remove('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
             }
         }
 
@@ -254,57 +289,54 @@
             }
 
             tbody.innerHTML = filtered.map((item) => {
-                let badgeColor = "bg-gray-100 text-gray-700";
+                let badgeColor = "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
                 let dateBadge = "";
 
-                // ตรวจสอบเงื่อนไขสีตามสถานะและวันที่
                 if (item.status === "👍 Approved" || item.status === "✅ เสร็จสิ้น") {
-                    badgeColor = "bg-green-100 text-green-700 font-semibold";
-                    dateBadge = `<span class="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-green-100 text-green-800 font-medium">🟢 อนุมัติงานแล้ว</span>`;
+                    badgeColor = "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 font-semibold";
+                    dateBadge = `<span class="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 font-medium">🟢 อนุมัติงานแล้ว</span>`;
                 } else if (item.noDate) {
-                    badgeColor = "bg-yellow-100 text-yellow-700";
-                    dateBadge = `<span class="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600">⏳ ไม่ได้กำหนดวันส่ง</span>`;
+                    badgeColor = "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300";
+                    dateBadge = `<span class="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">⏳ ไม่ได้กำหนดวันส่ง</span>`;
                 } else if (item.date) {
                     const itemDate = new Date(item.date);
                     itemDate.setHours(0, 0, 0, 0);
 
                     if (itemDate > today) {
-                        // 🟡 ก่อนถึงวันส่ง (สีเหลือง)
-                        badgeColor = "bg-yellow-100 text-yellow-800 font-medium";
-                        dateBadge = `<span class="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-yellow-100 text-yellow-800 font-medium">🟡 ก่อนถึงวันส่ง (${item.date})</span>`;
+                        badgeColor = "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 font-medium";
+                        dateBadge = `<span class="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 font-medium">🟡 ก่อนถึงวันส่ง (${item.date})</span>`;
                     } else {
-                        // 🔴 ถึงวันส่งงานแล้ว หรือเลยกำหนด (สีแดง)
-                        badgeColor = "bg-red-100 text-red-800 font-bold";
-                        dateBadge = `<span class="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-red-100 text-red-800 font-bold animate-pulse">🔴 ถึงวันส่งงาน (${item.date})</span>`;
+                        badgeColor = "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 font-bold";
+                        dateBadge = `<span class="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 font-bold animate-pulse">🔴 ถึงวันส่งงาน (${item.date})</span>`;
                     }
                 }
 
                 return `
-                    <tr class="hover:bg-gray-50/80 transition">
-                        <td class="p-3.5 font-medium text-gray-800">${item.customer}</td>
-                        <td class="p-3.5 text-gray-600 text-xs">
+                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-700/50 transition">
+                        <td class="p-3.5 font-medium text-gray-800 dark:text-gray-200">${item.customer}</td>
+                        <td class="p-3.5 text-gray-600 dark:text-gray-400 text-xs">
                             <div>📥 รับงาน: ${item.receiveDate || '-'}</div>
                             <div class="mt-0.5">🏁 กำหนดส่ง: ${item.noDate ? 'ไม่ได้กำหนด' : (item.date || '-')}</div>
-                            ${item.time ? `<div class="text-gray-500 mt-0.5">⏰ ${item.time}</div>` : ''}
+                            ${item.time ? `<div class="text-gray-500 dark:text-gray-400 mt-0.5">⏰ ${item.time}</div>` : ''}
                         </td>
                         <td class="p-3.5">
                             <span class="px-2.5 py-1 rounded-full text-xs ${badgeColor}">${item.status || 'รอดำเนินการ'}</span>
                             <div>${dateBadge}</div>
                         </td>
-                        <td class="p-3.5 text-gray-600">
+                        <td class="p-3.5 text-gray-600 dark:text-gray-300">
                             <div class="whitespace-pre-line">${item.details || '-'}</div>
-                            ${item.feedback ? `<div class="text-xs text-blue-700 bg-blue-50 p-1.5 mt-1.5 rounded-lg border border-blue-100">💬 ความเห็นผู้ตรวจ: ${item.feedback}</div>` : ''}
+                            ${item.feedback ? `<div class="text-xs text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 p-1.5 mt-1.5 rounded-lg border border-blue-100 dark:border-blue-800">💬 ความเห็นผู้ตรวจ: ${item.feedback}</div>` : ''}
                         </td>
                         <td class="p-3.5 text-center space-x-1">
-                            <button onclick="moveItem(${item.originalIndex}, -1)" class="text-gray-500 hover:text-black bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded text-xs" title="เลื่อนขึ้น">⬆️</button>
-                            <button onclick="moveItem(${item.originalIndex}, 1)" class="text-gray-500 hover:text-black bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded text-xs" title="เลื่อนลง">⬇️</button>
+                            <button onclick="moveItem(${item.originalIndex}, -1)" class="text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-2.5 py-1 rounded text-xs" title="เลื่อนขึ้น">⬆️</button>
+                            <button onclick="moveItem(${item.originalIndex}, 1)" class="text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-2.5 py-1 rounded text-xs" title="เลื่อนลง">⬇️</button>
                         </td>
                         <td class="p-3.5 text-center">
                             <button onclick="quickApprove(${item.originalIndex})" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg shadow-sm transition">👍 อนุมัติงาน</button>
                         </td>
                         <td class="p-3.5 text-center space-x-1">
-                            <button onclick="editItem(${item.originalIndex})" class="text-blue-600 hover:text-blue-800 text-xs bg-blue-50 px-2.5 py-1 rounded">แก้ไข</button>
-                            <button onclick="deleteItem(${item.originalIndex})" class="text-red-600 hover:text-red-800 text-xs bg-red-50 px-2.5 py-1 rounded">ลบ</button>
+                            <button onclick="editItem(${item.originalIndex})" class="text-blue-600 dark:text-blue-400 hover:underline text-xs bg-blue-50 dark:bg-blue-900/40 px-2.5 py-1 rounded">แก้ไข</button>
+                            <button onclick="deleteItem(${item.originalIndex})" class="text-red-600 dark:text-red-400 hover:underline text-xs bg-red-50 dark:bg-red-900/40 px-2.5 py-1 rounded">ลบ</button>
                         </td>
                     </tr>
                 `;
@@ -375,12 +407,12 @@
                 noDateCheckbox.checked = true;
                 deliveryDateInput.value = '';
                 deliveryDateInput.disabled = true;
-                deliveryDateInput.classList.add('bg-gray-200', 'cursor-not-allowed');
+                deliveryDateInput.classList.add('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
             } else {
                 noDateCheckbox.checked = false;
                 deliveryDateInput.value = item.date || '';
                 deliveryDateInput.disabled = false;
-                deliveryDateInput.classList.remove('bg-gray-200', 'cursor-not-allowed');
+                deliveryDateInput.classList.remove('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
             }
 
             document.getElementById('deliveryTime').value = item.time || '';
@@ -400,7 +432,7 @@
             document.getElementById('receiveDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('deliveryDate').value = '';
             document.getElementById('deliveryDate').disabled = false;
-            document.getElementById('deliveryDate').classList.remove('bg-gray-200', 'cursor-not-allowed');
+            document.getElementById('deliveryDate').classList.remove('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
             document.getElementById('noDeliveryDate').checked = false;
             document.getElementById('deliveryTime').value = '';
             document.getElementById('deliveryStatus').value = '🔥 กำลังทำ';

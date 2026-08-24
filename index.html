@@ -3,22 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery Schedule & Review System</title>
+    <title>Delivery Schedule & Review System (Pro Edition)</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 font-sans">
-    <div class="max-w-6xl mx-auto p-4 md:p-6">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <!-- ขยายพื้นที่ความกว้างเต็มจอ (w-[98%]) -->
+    <div class="w-[98%] mx-auto p-4 md:p-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800">🚀 ระบบจัดการและตรวจคิวส่งงาน (Team & Reviewer Sync)</h1>
+                <h1 class="text-2xl font-bold text-gray-800">🚀 ระบบจัดการและตรวจคิวส่งงาน (Pro Workspace)</h1>
                 <p class="text-sm text-gray-500">ซิงค์ข้อมูลแบบเรียลไทม์ผ่าน GitHub สำหรับทีมงานและผู้ตรวจ</p>
             </div>
-            <button onclick="toggleConfig()" class="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-2 rounded transition">⚙️ ตั้งค่า GitHub</button>
+            <button onclick="toggleConfig()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition border">⚙️ ตั้งค่า GitHub</button>
         </div>
 
+        <!-- Configuration Panel -->
         <div id="configPanel" class="hidden bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
             <h2 class="text-sm font-semibold text-gray-600 mb-3">ตั้งค่าการเชื่อมต่อ GitHub (บันทึกอัตโนมัติ)</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <input type="text" id="repoOwner" placeholder="GitHub Username / Org" class="border p-2 rounded text-sm">
                 <input type="text" id="repoName" placeholder="Repository Name" class="border p-2 rounded text-sm">
                 <input type="text" id="filePath" placeholder="File Path (เช่น schedule.json)" value="schedule.json" class="border p-2 rounded text-sm">
@@ -27,33 +29,40 @@
             <button onclick="loadData(); toggleConfig();" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition">บันทึกและเชื่อมต่อ</button>
         </div>
 
+        <!-- Add / Edit Schedule Form (จัดวางให้ใช้พื้นที่คุ้มค่า + เพิ่มช่องเวลา + Textarea ละเอียด) -->
         <div class="bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
-            <h2 id="formTitle" class="text-sm font-semibold text-gray-600 mb-3">➕ เพิ่มคิวส่งงานใหม่</h2>
+            <h2 id="formTitle" class="text-sm font-semibold text-gray-700 mb-3">➕ เพิ่มคิวส่งงานใหม่</h2>
             <input type="hidden" id="editIndex" value="-1">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <input type="text" id="customerName" placeholder="ชื่อลูกค้า / ชิ้นงาน" class="border p-2 rounded text-sm">
-                <input type="date" id="deliveryDate" class="border p-2 rounded text-sm">
-                <select id="deliveryStatus" class="border p-2 rounded text-sm bg-white">
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
+                <input type="text" id="customerName" placeholder="ชื่อลูกค้า / ชิ้นงาน" class="border p-2.5 rounded-lg text-sm bg-gray-50 focus:bg-white">
+                <input type="date" id="deliveryDate" class="border p-2.5 rounded-lg text-sm bg-gray-50 focus:bg-white">
+                <input type="time" id="deliveryTime" class="border p-2.5 rounded-lg text-sm bg-gray-50 focus:bg-white">
+                <select id="deliveryStatus" class="border p-2.5 rounded-lg text-sm bg-gray-50 focus:bg-white">
                     <option value="🔥 กำลังทำ">🔥 กำลังทำ</option>
                     <option value="⏳ รอดำเนินการ">⏳ รอดำเนินการ</option>
                     <option value="👍 Approved">👍 Approved</option>
                     <option value="✅ เสร็จสิ้น">✅ เสร็จสิ้น</option>
                 </select>
-                <input type="text" id="deliveryDetails" placeholder="รายละเอียดงาน" class="border p-2 rounded text-sm">
             </div>
-            <div class="mt-3">
-                <input type="text" id="reviewerFeedback" placeholder="💬 ความเห็น/ข้อเสนอแนะจากผู้ตรวจ (ถ้ามี)" class="w-full border p-2 rounded text-sm bg-yellow-50">
+
+            <!-- ช่องรายละเอียดงานแบบ Textarea ขยายได้เยอะ -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <textarea id="deliveryDetails" rows="2" placeholder="📝 รายละเอียดงาน (พิมพ์ข้อมูลได้เยอะขึ้น เช่น สเปกงาน, ลิงก์ไฟล์, หมายเหตุต่างๆ)" class="border p-2.5 rounded-lg text-sm bg-gray-50 focus:bg-white w-full"></textarea>
+                <textarea id="reviewerFeedback" rows="2" placeholder="💬 ความเห็น/ข้อเสนอแนะจากผู้ตรวจ (ถ้ามี)" class="border p-2.5 rounded-lg text-sm bg-yellow-50 focus:bg-white w-full"></textarea>
             </div>
-            <div class="mt-3 flex gap-2">
-                <button onclick="saveItem()" id="saveBtn" class="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700 transition">บันทึกคิวงานลงระบบ</button>
-                <button onclick="resetForm()" id="cancelBtn" class="hidden bg-gray-400 text-white px-4 py-2 rounded text-sm hover:bg-gray-500 transition">ยกเลิก</button>
-                <button onclick="loadData()" class="ml-auto bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded text-sm transition">🔄รีเฟรชข้อมูลล่าสุด</button>
+
+            <div class="flex gap-2">
+                <button onclick="saveItem()" id="saveBtn" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition shadow-sm">บันทึกคิวงานลงระบบ</button>
+                <button onclick="resetForm()" id="cancelBtn" class="hidden bg-gray-400 hover:bg-gray-500 text-white px-4 py-2.5 rounded-lg text-sm transition">ยกเลิก</button>
+                <button onclick="loadData()" class="ml-auto bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2.5 rounded-lg text-sm transition flex items-center gap-1">🔄 รีเฟรชข้อมูล</button>
             </div>
         </div>
 
+        <!-- Search & Filter Bar -->
         <div class="flex flex-col md:flex-row gap-3 mb-4">
-            <input type="text" id="searchInput" oninput="renderTable()" placeholder="🔍 ค้นหาชื่อลูกค้า หรือรายละเอียด..." class="flex-1 border p-2 rounded-xl text-sm bg-white">
-            <select id="filterStatus" onchange="renderTable()" class="border p-2 rounded-xl text-sm bg-white">
+            <input type="text" id="searchInput" oninput="renderTable()" placeholder="🔍 ค้นหาชื่อลูกค้า หรือรายละเอียด..." class="flex-1 border p-2.5 rounded-xl text-sm bg-white shadow-sm">
+            <select id="filterStatus" onchange="renderTable()" class="border p-2.5 rounded-xl text-sm bg-white shadow-sm md:w-64">
                 <option value="ALL">📌 แสดงทุกสถานะ</option>
                 <option value="🔥 กำลังทำ">🔥 กำลังทำ</option>
                 <option value="⏳ รอดำเนินการ">⏳ รอดำเนินการ</option>
@@ -62,21 +71,22 @@
             </select>
         </div>
 
+        <!-- Schedule Table (ขยายตารางเต็มจอ) -->
         <div class="bg-white rounded-xl shadow-sm overflow-x-auto border border-gray-100">
-            <table class="w-full text-left border-collapse min-w-[800px]">
+            <table class="w-full text-left border-collapse min-w-[900px]">
                 <thead>
                     <tr class="bg-gray-100 text-gray-700 text-xs uppercase tracking-wider">
-                        <th class="p-3">ลูกค้า / งาน</th>
-                        <th class="p-3">วันที่ส่ง</th>
-                        <th class="p-3">สถานะ</th>
-                        <th class="p-3">รายละเอียด & ฟีดแบ็กผู้ตรวจ</th>
-                        <th class="p-3 text-center">จัดลำดับ</th>
-                        <th class="p-3 text-center">ตรวจงานด่วน</th>
-                        <th class="p-3 text-center">จัดการ</th>
+                        <th class="p-3.5">ลูกค้า / งาน</th>
+                        <th class="p-3.5">กำหนดส่ง</th>
+                        <th class="p-3.5">สถานะ</th>
+                        <th class="p-3.5 w-2/5">รายละเอียดงาน & ฟีดแบ็กผู้ตรวจ</th>
+                        <th class="p-3.5 text-center">จัดลำดับ</th>
+                        <th class="p-3.5 text-center">ตรวจงานด่วน</th>
+                        <th class="p-3.5 text-center">จัดการ</th>
                     </tr>
                 </thead>
                 <tbody id="scheduleTable" class="divide-y divide-gray-100 text-sm">
-                    <tr><td colspan="7" class="p-4 text-center text-gray-400">กำลังโหลดข้อมูล...</td></tr>
+                    <tr><td colspan="7" class="p-6 text-center text-gray-400">กำลังโหลดข้อมูล...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -96,13 +106,12 @@
                 loadData();
             } else {
                 document.getElementById('configPanel').classList.remove('hidden');
-                document.getElementById('scheduleTable').innerHTML = `<tr><td colspan="7" class="p-4 text-center text-orange-500">กรุณาคลิกปุ่ม "⚙️ ตั้งค่า GitHub" ด้านบนเพื่อเชื่อมต่อระบบก่อนใช้งาน</td></tr>`;
+                document.getElementById('scheduleTable').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-orange-500 font-medium">กรุณาคลิกปุ่ม "⚙️ ตั้งค่า GitHub" ด้านบนเพื่อเชื่อมต่อระบบก่อนใช้งาน</td></tr>`;
             }
         };
 
         function toggleConfig() {
-            const panel = document.getElementById('configPanel');
-            panel.classList.toggle('hidden');
+            document.getElementById('configPanel').classList.toggle('hidden');
         }
 
         async function loadData() {
@@ -131,7 +140,6 @@
 
                 if (!response.ok) {
                     if(response.status === 404) {
-                        // ถ้ายังไม่มีไฟล์ ให้สร้างไฟล์เปล่าเริ่มต้นให้อัตโนมัติ
                         scheduleData = [];
                         renderTable();
                         return;
@@ -145,7 +153,7 @@
                 scheduleData = Array.isArray(decodedContent) ? decodedContent : [];
                 renderTable();
             } catch (error) {
-                document.getElementById('scheduleTable').innerHTML = `<tr><td colspan="7" class="p-4 text-center text-red-400">เกิดข้อผิดพลาด: ${error.message}</td></tr>`;
+                document.getElementById('scheduleTable').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-400">เกิดข้อผิดพลาด: ${error.message}</td></tr>`;
             }
         }
 
@@ -188,11 +196,10 @@
             const selectedStatus = document.getElementById('filterStatus').value;
 
             if (scheduleData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400">ยังไม่มีรายการคิวส่งงาน</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">ยังไม่มีรายการคิวส่งงาน</td></tr>`;
                 return;
             }
 
-            // กรองข้อมูลตามคำค้นหาและสถานะ
             const filtered = scheduleData.map((item, originalIndex) => ({ ...item, originalIndex }))
                 .filter(item => {
                     const matchKeyword = (item.customer || '').toLowerCase().includes(keyword) || (item.details || '').toLowerCase().includes(keyword);
@@ -201,7 +208,7 @@
                 });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400">ไม่พบรายการที่ค้นหา</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">ไม่พบรายการที่ค้นหา</td></tr>`;
                 return;
             }
 
@@ -213,24 +220,27 @@
                 if (item.status === "✅ เสร็จสิ้น") badgeColor = "bg-green-100 text-green-700";
 
                 return `
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="p-3 font-medium text-gray-800">${item.customer}</td>
-                        <td class="p-3 text-gray-600">${item.date}</td>
-                        <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs ${badgeColor}">${item.status || 'รอดำเนินการ'}</span></td>
-                        <td class="p-3 text-gray-600">
-                            <div>${item.details || '-'}</div>
-                            ${item.feedback ? `<div class="text-xs text-blue-600 bg-blue-50 p-1 mt-1 rounded">💬 ความเห็นผู้ตรวจ: ${item.feedback}</div>` : ''}
+                    <tr class="hover:bg-gray-50/80 transition">
+                        <td class="p-3.5 font-medium text-gray-800">${item.customer}</td>
+                        <td class="p-3.5 text-gray-600 text-xs">
+                            <div>📅 ${item.date || '-'}</div>
+                            ${item.time ? `<div class="text-gray-500 mt-0.5">⏰ ${item.time}</div>` : ''}
                         </td>
-                        <td class="p-3 text-center space-x-1">
-                            <button onclick="moveItem(${item.originalIndex}, -1)" class="text-gray-500 hover:text-black bg-gray-100 px-2 py-1 rounded text-xs" title="เลื่อนขึ้น">⬆️</button>
-                            <button onclick="moveItem(${item.originalIndex}, 1)" class="text-gray-500 hover:text-black bg-gray-100 px-2 py-1 rounded text-xs" title="เลื่อนลง">⬇️</button>
+                        <td class="p-3.5"><span class="px-2.5 py-1 rounded-full text-xs ${badgeColor}">${item.status || 'รอดำเนินการ'}</span></td>
+                        <td class="p-3.5 text-gray-600">
+                            <div class="whitespace-pre-line">${item.details || '-'}</div>
+                            ${item.feedback ? `<div class="text-xs text-blue-700 bg-blue-50 p-1.5 mt-1.5 rounded-lg border border-blue-100">💬 ความเห็นผู้ตรวจ: ${item.feedback}</div>` : ''}
                         </td>
-                        <td class="p-3 text-center">
-                            <button onclick="quickApprove(${item.originalIndex})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded shadow-sm transition">👍 อนุมัติงาน</button>
+                        <td class="p-3.5 text-center space-x-1">
+                            <button onclick="moveItem(${item.originalIndex}, -1)" class="text-gray-500 hover:text-black bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded text-xs" title="เลื่อนขึ้น">⬆️</button>
+                            <button onclick="moveItem(${item.originalIndex}, 1)" class="text-gray-500 hover:text-black bg-gray-100 hover:bg-gray-200 px-2.5 py-1 rounded text-xs" title="เลื่อนลง">⬇️</button>
                         </td>
-                        <td class="p-3 text-center space-x-1">
-                            <button onclick="editItem(${item.originalIndex})" class="text-blue-500 hover:text-blue-700 text-xs bg-blue-50 px-2.5 py-1 rounded">แก้ไข</button>
-                            <button onclick="deleteItem(${item.originalIndex})" class="text-red-500 hover:text-red-700 text-xs bg-red-50 px-2.5 py-1 rounded">ลบ</button>
+                        <td class="p-3.5 text-center">
+                            <button onclick="quickApprove(${item.originalIndex})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg shadow-sm transition">👍 อนุมัติงาน</button>
+                        </td>
+                        <td class="p-3.5 text-center space-x-1">
+                            <button onclick="editItem(${item.originalIndex})" class="text-blue-600 hover:text-blue-800 text-xs bg-blue-50 px-2.5 py-1 rounded">แก้ไข</button>
+                            <button onclick="deleteItem(${item.originalIndex})" class="text-red-600 hover:text-red-800 text-xs bg-red-50 px-2.5 py-1 rounded">ลบ</button>
                         </td>
                     </tr>
                 `;
@@ -240,6 +250,7 @@
         async function saveItem() {
             const customer = document.getElementById('customerName').value.trim();
             const date = document.getElementById('deliveryDate').value;
+            const time = document.getElementById('deliveryTime').value;
             const status = document.getElementById('deliveryStatus').value;
             const details = document.getElementById('deliveryDetails').value.trim();
             const feedback = document.getElementById('reviewerFeedback').value.trim();
@@ -251,9 +262,9 @@
             }
 
             if (editIndex === -1) {
-                scheduleData.unshift({ customer, date, status, details, feedback });
+                scheduleData.unshift({ customer, date, time, status, details, feedback });
             } else {
-                scheduleData[editIndex] = { customer, date, status, details, feedback };
+                scheduleData[editIndex] = { customer, date, time, status, details, feedback };
             }
             
             try {
@@ -283,6 +294,7 @@
             const item = scheduleData[index];
             document.getElementById('customerName').value = item.customer;
             document.getElementById('deliveryDate').value = item.date;
+            document.getElementById('deliveryTime').value = item.time || '';
             document.getElementById('deliveryStatus').value = item.status || "⏳ รอดำเนินการ";
             document.getElementById('deliveryDetails').value = item.details || '';
             document.getElementById('reviewerFeedback').value = item.feedback || '';
@@ -297,6 +309,7 @@
         function resetForm() {
             document.getElementById('customerName').value = '';
             document.getElementById('deliveryDate').value = '';
+            document.getElementById('deliveryTime').value = '';
             document.getElementById('deliveryStatus').value = '🔥 กำลังทำ';
             document.getElementById('deliveryDetails').value = '';
             document.getElementById('reviewerFeedback').value = '';

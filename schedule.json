@@ -58,16 +58,6 @@
     "feedback": "อนุมัติเรียบร้อย"
   },
   {
-    "customer": "AW M.1 Star/Istar ภายในและภายนอก",
-    "receiveDate": "2026-08-19",
-    "date": "2026-08-26",
-    "noDate": false,
-    "time": "",
-    "status": "✅ เสร็จสิ้น",
-    "details": "ออกแบบ 2-3 แบบ โพส 1/ก.ย/69",
-    "feedback": ""
-  },
-  {
     "customer": "AW M.4 รอบภายใน",
     "receiveDate": "2026-08-19",
     "date": "2026-08-26",
@@ -76,6 +66,16 @@
     "status": "👍 Approved",
     "details": "ออกแบบ 2-3 แบบ โพส 1/ก.ย/69",
     "feedback": "อนุมัติเรียบร้อย"
+  },
+  {
+    "customer": "AW M.1 Star/Istar ภายในและภายนอก",
+    "receiveDate": "2026-08-19",
+    "date": "2026-08-26",
+    "noDate": false,
+    "time": "",
+    "status": "✅ เสร็จสิ้น",
+    "details": "ออกแบบ 2-3 แบบ โพส 1/ก.ย/69",
+    "feedback": ""
   },
   {
     "customer": "AW ทุนภายใน M.1+M.4",

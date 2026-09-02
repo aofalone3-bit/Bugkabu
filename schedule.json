@@ -118,16 +118,6 @@
     "feedback": "โพสหน้าเฟสบุค วันที่ 1กันยายน 2569 | อนุมัติเรียบร้อย"
   },
   {
-    "customer": "AW M.1 โควต้า รอบภายใน",
-    "receiveDate": "2026-08-19",
-    "date": "2026-08-26",
-    "noDate": false,
-    "time": "",
-    "status": "👍 Approved",
-    "details": "ออกแบบ 2-3 แบบ โพส 1/ก.ย/69",
-    "feedback": "อนุมัติเรียบร้อย"
-  },
-  {
     "customer": "AW M.1 Star/Istar ภายในและภายนอก",
     "receiveDate": "2026-08-19",
     "date": "2026-08-26",
@@ -136,6 +126,16 @@
     "status": "✅ เสร็จสิ้น",
     "details": "ออกแบบ 2-3 แบบ โพส 1/ก.ย/69",
     "feedback": ""
+  },
+  {
+    "customer": "AW M.1 โควต้า รอบภายใน",
+    "receiveDate": "2026-08-19",
+    "date": "2026-08-26",
+    "noDate": false,
+    "time": "",
+    "status": "👍 Approved",
+    "details": "ออกแบบ 2-3 แบบ โพส 1/ก.ย/69",
+    "feedback": "อนุมัติเรียบร้อย"
   },
   {
     "customer": "AW ทุนภายใน M.1+M.4",

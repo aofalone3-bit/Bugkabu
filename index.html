@@ -1,488 +1,317 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery Schedule & Review System (Pro Edition) v2.0</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
-    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบจัดการคิวส่งงาน v3.0</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class'}</script>
+<style>
+  body{font-family:'Sarabun','Noto Sans Thai',system-ui,sans-serif}
+  .fade{animation:f .2s ease}@keyframes f{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
+  @media (prefers-reduced-motion:reduce){.fade{animation:none}}
+  :focus-visible{outline:2px solid #2563eb;outline-offset:2px}
+</style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
-    <div class="w-[98%] mx-auto p-4 md:p-6 min-h-screen flex flex-col">
-        <!-- Header & Theme Toggle -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center flex-wrap gap-2">
-                    🚀 ระบบจัดการและตรวจคิวส่งงาน (Pro Workspace)
-                    <span class="text-xs font-semibold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-800">v2.0</span>
-                </h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">ซิงค์ข้อมูลแบบเรียลไทม์ผ่าน GitHub สำหรับทีมงานและผู้ตรวจ</p>
-            </div>
-            <div class="flex items-center gap-2">
-                <button id="themeToggleBtn" onclick="toggleDarkMode()" class="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-3 py-2 rounded-lg transition border dark:border-gray-600 flex items-center gap-1.5">
-                    🌙 โหมดมืด
-                </button>
-                <button onclick="toggleConfig()" class="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-3 py-2 rounded-lg transition border dark:border-gray-600">
-                    ⚙️ ตั้งค่า GitHub
-                </button>
-            </div>
-        </div>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors">
+<div class="max-w-6xl mx-auto p-3 md:p-6">
 
-        <!-- Configuration Panel -->
-        <div id="configPanel" class="hidden bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-6 border border-gray-100 dark:border-gray-700 transition-colors">
-            <h2 class="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-3">ตั้งค่าการเชื่อมต่อ GitHub (บันทึกอัตโนมัติ)</h2>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                <input type="text" id="repoOwner" placeholder="GitHub Username / Org" class="border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-2 rounded text-sm">
-                <input type="text" id="repoName" placeholder="Repository Name" class="border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-2 rounded text-sm">
-                <input type="text" id="filePath" placeholder="File Path (เช่น schedule.json)" value="schedule.json" class="border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-2 rounded text-sm">
-                <input type="password" id="githubToken" placeholder="GitHub Personal Access Token (PAT)" class="border dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 p-2 rounded text-sm">
-            </div>
-            <button onclick="loadData(); toggleConfig();" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition">บันทึกและเชื่อมต่อ</button>
-        </div>
-
-        <!-- Add / Edit Schedule Form -->
-        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm mb-6 border border-gray-100 dark:border-gray-700 transition-colors">
-            <h2 id="formTitle" class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">➕ เพิ่มคิวส่งงานใหม่</h2>
-            <input type="hidden" id="editIndex" value="-1">
-            
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-3">
-                <!-- ชื่อลูกค้า -->
-                <div class="flex flex-col gap-1">
-                    <label class="text-xs text-gray-500 dark:text-gray-400 font-medium">ชื่อลูกค้า / ชิ้นงาน</label>
-                    <input type="text" id="customerName" placeholder="ระบุชื่อลูกค้า..." class="border dark:border-gray-600 p-2.5 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700">
-                </div>
-                <!-- วันรับงาน -->
-                <div class="flex flex-col gap-1">
-                    <label class="text-xs text-gray-500 dark:text-gray-400 font-medium">📥 วันรับงาน</label>
-                    <input type="date" id="receiveDate" class="border dark:border-gray-600 p-2.5 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700">
-                </div>
-                <!-- วันส่งงาน + ติ๊กไม่ได้กำหนด -->
-                <div class="flex flex-col gap-1">
-                    <div class="flex justify-between items-center">
-                        <label class="text-xs text-gray-500 dark:text-gray-400 font-medium">🏁 วันส่งงาน</label>
-                        <label class="text-xs flex items-center gap-1 cursor-pointer text-gray-600 dark:text-gray-300 font-medium">
-                            <input type="checkbox" id="noDeliveryDate" onchange="toggleDeliveryDate(this)" class="rounded"> ไม่ได้กำหนด
-                        </label>
-                    </div>
-                    <input type="date" id="deliveryDate" class="border dark:border-gray-600 p-2.5 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700">
-                </div>
-                <!-- เวลาส่ง -->
-                <div class="flex flex-col gap-1">
-                    <label class="text-xs text-gray-500 dark:text-gray-400 font-medium">⏰ เวลาส่ง</label>
-                    <input type="time" id="deliveryTime" class="border dark:border-gray-600 p-2.5 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700">
-                </div>
-                <!-- สถานะ -->
-                <div class="flex flex-col gap-1">
-                    <label class="text-xs text-gray-500 dark:text-gray-400 font-medium">📌 สถานะงาน</label>
-                    <select id="deliveryStatus" class="border dark:border-gray-600 p-2.5 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700">
-                        <option value="🔥 กำลังทำ">🔥 กำลังทำ</option>
-                        <option value="⏳ รอดำเนินการ">⏳ รอดำเนินการ</option>
-                        <option value="👍 Approved">👍 Approved</option>
-                        <option value="✅ เสร็จสิ้น">✅ เสร็จสิ้น</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- ช่องรายละเอียดงานและฟีดแบ็ก -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                <textarea id="deliveryDetails" rows="2" placeholder="📝 รายละเอียดงาน (สเปกงาน, ลิงก์ไฟล์งาน Google Drive ฯลฯ)" class="border dark:border-gray-600 p-2.5 rounded-lg text-sm bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700 w-full"></textarea>
-                <textarea id="reviewerFeedback" rows="2" placeholder="💬 ความเห็น/ข้อเสนอแนะจากผู้ตรวจ (ถ้ามี)" class="border dark:border-gray-600 p-2.5 rounded-lg text-sm bg-yellow-50 dark:bg-yellow-900/30 text-gray-800 dark:text-gray-100 focus:bg-white dark:focus:bg-gray-700 w-full"></textarea>
-            </div>
-
-            <div class="flex gap-2">
-                <button onclick="saveItem()" id="saveBtn" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition shadow-sm">บันทึกคิวงานลงระบบ</button>
-                <button onclick="resetForm()" id="cancelBtn" class="hidden bg-gray-400 hover:bg-gray-500 text-white px-4 py-2.5 rounded-lg text-sm transition">ยกเลิก</button>
-                <button onclick="loadData()" class="ml-auto bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-4 py-2.5 rounded-lg text-sm transition flex items-center gap-1 border dark:border-gray-600">🔄 รีเฟรชข้อมูล</button>
-            </div>
-        </div>
-
-        <!-- Search & Filter Bar -->
-        <div class="flex flex-col md:flex-row gap-3 mb-4">
-            <input type="text" id="searchInput" oninput="renderTable()" placeholder="🔍 ค้นหาชื่อลูกค้า หรือรายละเอียด..." class="flex-1 border dark:border-gray-700 p-2.5 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 shadow-sm transition-colors">
-            <select id="filterStatus" onchange="renderTable()" class="border dark:border-gray-700 p-2.5 rounded-xl text-sm bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 shadow-sm md:w-64 transition-colors">
-                <option value="ALL">📌 แสดงทุกสถานะ</option>
-                <option value="🔥 กำลังทำ">🔥 กำลังทำ</option>
-                <option value="⏳ รอดำเนินการ">⏳ รอดำเนินการ</option>
-                <option value="👍 Approved">👍 Approved</option>
-                <option value="✅ เสร็จสิ้น">✅ เสร็จสิ้น</option>
-            </select>
-        </div>
-
-        <!-- Schedule Table -->
-        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-x-auto border border-gray-100 dark:border-gray-700 transition-colors mb-6">
-            <table class="w-full text-left border-collapse min-w-[950px]">
-                <thead>
-                    <tr class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs uppercase tracking-wider border-b dark:border-gray-600">
-                        <th class="p-3.5">ลูกค้า / งาน</th>
-                        <th class="p-3.5">กำหนดการ & เวลา</th>
-                        <th class="p-3.5">สถานะ</th>
-                        <th class="p-3.5 w-2/5">รายละเอียดงาน & ฟีดแบ็กผู้ตรวจ</th>
-                        <th class="p-3.5 text-center">จัดลำดับ</th>
-                        <th class="p-3.5 text-center">ตรวจงานด่วน</th>
-                        <th class="p-3.5 text-center">จัดการ</th>
-                    </tr>
-                </thead>
-                <tbody id="scheduleTable" class="divide-y divide-gray-100 dark:divide-gray-700 text-sm">
-                    <tr><td colspan="7" class="p-6 text-center text-gray-400 dark:text-gray-500">กำลังโหลดข้อมูล...</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Footer Version -->
-        <footer class="mt-auto pt-4 border-t dark:border-gray-800 text-center text-xs text-gray-400 dark:text-gray-500">
-            <p>Delivery Schedule & Review System <strong>v2.0</strong></p>
-            <p class="mt-1 opacity-70">Powered by Jamie (AI Assistant)</p>
-        </footer>
+  <!-- Header -->
+  <header class="flex flex-wrap items-center justify-between gap-3 mb-4">
+    <div>
+      <h1 class="text-xl md:text-2xl font-bold">📋 คิวส่งงาน & ตรวจงาน <span class="text-xs font-semibold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full align-middle">v3.0</span></h1>
+      <p id="syncStatus" class="text-xs text-slate-500 dark:text-slate-400 mt-1">ยังไม่ได้เชื่อมต่อ</p>
     </div>
+    <div class="flex flex-wrap gap-2 text-xs">
+      <button onclick="copySummary()" class="btn">📋 คัดลอกสรุป (ส่งไลน์)</button>
+      <button onclick="exportCSV()" class="btn">⬇️ CSV</button>
+      <button onclick="load()" class="btn">🔄 รีเฟรช</button>
+      <button onclick="toggleTheme()" id="themeBtn" class="btn">🌙</button>
+      <button onclick="toggle('configPanel')" class="btn">⚙️ ตั้งค่า</button>
+    </div>
+  </header>
 
-    <script>
-        let fileSha = "";
-        let scheduleData = [];
+  <!-- Config -->
+  <section id="configPanel" class="hidden card mb-4">
+    <h2 class="font-semibold text-sm mb-2">เชื่อมต่อ GitHub</h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+      <input id="repoOwner" placeholder="GitHub Username / Org" value="aofalone3-bit" class="inp">
+      <input id="repoName" placeholder="Repository" value="Bugkabu" class="inp">
+      <input id="filePath" placeholder="ไฟล์ข้อมูล" value="schedule.json" class="inp">
+      <div class="flex gap-1"><input id="githubToken" type="password" placeholder="Token (PAT)" class="inp flex-1 min-w-0"><button type="button" class="btn" onclick="const t=githubToken;t.type=t.type==='password'?'text':'password'">👁</button></div>
+    </div>
+    <p class="text-xs text-amber-700 dark:text-amber-300 mt-2">🔒 Token เก็บในเบราว์เซอร์เครื่องนี้เท่านั้น แนะนำใช้ Fine-grained token ที่ให้สิทธิ์ Contents: Read and write เฉพาะ repo นี้ และไม่ใช้บนเครื่องสาธารณะ</p>
+    <div class="flex gap-2 mt-3">
+      <button onclick="saveConfig()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">บันทึกและเชื่อมต่อ</button>
+      <button onclick="clearConfig()" class="btn">ล้าง Token</button>
+    </div>
+  </section>
 
-        window.onload = function() {
-            // โหมดมืดเริ่มต้นจาก LocalStorage
-            if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            }
-            updateThemeIcon();
+  <!-- Stats -->
+  <section id="stats" class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4"></section>
 
-            document.getElementById('receiveDate').value = new Date().toISOString().split('T')[0];
+  <!-- Toolbar -->
+  <div class="flex flex-col md:flex-row gap-2 mb-3">
+    <button onclick="openForm()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm">+ เพิ่มงานใหม่</button>
+    <input id="searchInput" oninput="render()" placeholder="🔍 ค้นหาชื่อลูกค้า / รายละเอียด" class="inp flex-1">
+    <select id="sortMode" onchange="render()" class="inp md:w-52">
+      <option value="manual">เรียงตามที่จัดเอง</option>
+      <option value="due">เรียงตามวันส่ง (ใกล้สุดก่อน)</option>
+      <option value="recent">อัปเดตล่าสุด</option>
+    </select>
+  </div>
+  <div id="tabs" class="flex flex-wrap gap-1.5 mb-4 text-xs"></div>
 
-            if (localStorage.getItem('gh_owner')) document.getElementById('repoOwner').value = localStorage.getItem('gh_owner');
-            if (localStorage.getItem('gh_repo')) document.getElementById('repoName').value = localStorage.getItem('gh_repo');
-            if (localStorage.getItem('gh_path')) document.getElementById('filePath').value = localStorage.getItem('gh_path');
-            if (localStorage.getItem('gh_token')) document.getElementById('githubToken').value = localStorage.getItem('gh_token');
+  <!-- List -->
+  <main id="list" class="space-y-2"></main>
 
-            if (localStorage.getItem('gh_owner') && localStorage.getItem('gh_repo') && localStorage.getItem('gh_token')) {
-                loadData();
-            } else {
-                document.getElementById('configPanel').classList.remove('hidden');
-                document.getElementById('scheduleTable').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-orange-500 font-medium">กรุณาคลิกปุ่ม "⚙️ ตั้งค่า GitHub" ด้านบนเพื่อเชื่อมต่อระบบก่อนใช้งาน</td></tr>`;
-            }
-        };
+  <footer class="text-center text-xs text-slate-400 mt-8">ระบบคิวส่งงาน v3.0 · ซิงค์อัตโนมัติทุก 60 วินาที</footer>
+</div>
 
-        function toggleDarkMode() {
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            }
-            updateThemeIcon();
-        }
+<!-- Form modal -->
+<div id="formModal" class="hidden fixed inset-0 z-40 bg-black/50 flex items-start md:items-center justify-center p-3 overflow-y-auto" onclick="if(event.target===this)closeForm()">
+  <div class="card w-full max-w-2xl fade" onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter')saveItem()">
+    <h2 id="formTitle" class="font-semibold mb-3">เพิ่มงานใหม่</h2>
+    <input type="hidden" id="editId">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <label class="lbl md:col-span-2">ชื่อลูกค้า / ชิ้นงาน *<input id="customerName" class="inp mt-1" placeholder="เช่น คุณสมชาย – โปสเตอร์ A3"></label>
+      <label class="lbl">วันรับงาน *<input type="date" id="receiveDate" class="inp mt-1"></label>
+      <div class="lbl">วันส่งงาน
+        <div class="flex gap-2 mt-1 items-center">
+          <input type="date" id="deliveryDate" class="inp flex-1">
+          <label class="flex items-center gap-1 whitespace-nowrap"><input type="checkbox" id="noDeliveryDate" onchange="syncNoDate()"> ไม่กำหนด</label>
+        </div>
+        <div class="flex gap-1 mt-1.5">
+          <button type="button" class="chip" onclick="quickDue(0)">วันนี้</button>
+          <button type="button" class="chip" onclick="quickDue(1)">พรุ่งนี้</button>
+          <button type="button" class="chip" onclick="quickDue(3)">+3 วัน</button>
+          <button type="button" class="chip" onclick="quickDue(7)">+7 วัน</button>
+        </div>
+      </div>
+      <label class="lbl">เวลาส่ง<input type="time" id="deliveryTime" class="inp mt-1"></label>
+      <label class="lbl">สถานะ
+        <select id="deliveryStatus" class="inp mt-1"></select>
+      </label>
+      <label class="lbl">ความสำคัญ
+        <select id="priority" class="inp mt-1"><option value="normal">ปกติ</option><option value="high">🔺 ด่วน</option></select>
+      </label>
+      <label class="lbl md:col-span-2">รายละเอียดงาน (วางลิงก์ Drive ได้ กดเปิดได้เลย)<textarea id="deliveryDetails" rows="3" class="inp mt-1"></textarea></label>
+      <label class="lbl md:col-span-2">ความเห็นจากผู้ตรวจ<textarea id="reviewerFeedback" rows="2" class="inp mt-1 !bg-yellow-50 dark:!bg-yellow-900/30"></textarea></label>
+    </div>
+    <div class="flex gap-2 mt-4">
+      <button id="saveBtn" onclick="saveItem()" class="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium">บันทึก</button>
+      <button onclick="closeForm()" class="btn">ยกเลิก</button>
+      <span class="ml-auto text-xs text-slate-400 self-center hidden md:inline">Ctrl+Enter = บันทึก</span>
+    </div>
+  </div>
+</div>
 
-        function updateThemeIcon() {
-            const isDark = document.documentElement.classList.contains('dark');
-            document.getElementById('themeToggleBtn').innerHTML = isDark ? '☀️ โหมดสว่าง' : '🌙 โหมดมืด';
-        }
+<div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 hidden px-4 py-2 rounded-lg text-sm text-white shadow-lg"></div>
 
-        function toggleConfig() {
-            document.getElementById('configPanel').classList.toggle('hidden');
-        }
+<style type="text/tailwindcss">
+  .card{@apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 shadow-sm}
+  .inp{@apply w-full border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 p-2.5 rounded-lg text-sm}
+  .btn{@apply bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 px-3 py-2 rounded-lg transition}
+  .lbl{@apply text-xs font-medium text-slate-500 dark:text-slate-400 block}
+  .chip{@apply text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600}
+</style>
 
-        function toggleDeliveryDate(cb) {
-            const dateInput = document.getElementById('deliveryDate');
-            if (cb.checked) {
-                dateInput.value = '';
-                dateInput.disabled = true;
-                dateInput.classList.add('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
-            } else {
-                dateInput.disabled = false;
-                dateInput.classList.remove('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
-            }
-        }
+<script>
+const STATUSES=['⏳ รอดำเนินการ','🔥 กำลังทำ','🔍 รอตรวจ','👍 Approved','✅ เสร็จสิ้น'];
+const DONE=['👍 Approved','✅ เสร็จสิ้น'];
+let data=[],sha='',tab='active',busy=false,lastLoad=0;
 
-        async function loadData() {
-            const owner = document.getElementById('repoOwner').value.trim();
-            const repo = document.getElementById('repoName').value.trim();
-            const path = document.getElementById('filePath').value.trim();
-            const token = document.getElementById('githubToken').value.trim();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const linkify=s=>esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 underline break-all">$1</a>');
+const todayStr=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const isDone=i=>DONE.includes(i.status);
+const daysLeft=i=>(!i.date||i.noDate)?null:Math.round((new Date(i.date+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/864e5);
+const toggle=id=>$(id).classList.toggle('hidden');
 
-            if (!owner || !repo || !token) {
-                alert("กรุณากรอกข้อมูล GitHub Configuration ให้ครบถ้วน");
-                document.getElementById('configPanel').classList.remove('hidden');
-                return;
-            }
+/* ---------- init ---------- */
+window.onload=()=>{
+  if(localStorage.theme==='dark'||(!localStorage.theme&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');
+  themeIcon();
+  $('deliveryStatus').innerHTML=STATUSES.map(s=>`<option>${s}</option>`).join('');
+  ['owner','repo','path','token'].forEach(k=>{const v=localStorage['gh_'+k];if(v)$({owner:'repoOwner',repo:'repoName',path:'filePath',token:'githubToken'}[k]).value=v});
+  try{data=JSON.parse(localStorage.cache_data||'[]')}catch{data=[]}
+  render();
+  if(localStorage.gh_owner&&localStorage.gh_repo&&localStorage.gh_token)load();
+  else{$('configPanel').classList.remove('hidden');status('ยังไม่ได้เชื่อมต่อ GitHub')}
+  setInterval(()=>{if(!busy&&$('formModal').classList.contains('hidden')&&!document.hidden&&cfg().token)load(true)},60000);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeForm()});
+};
 
-            localStorage.setItem('gh_owner', owner);
-            localStorage.setItem('gh_repo', repo);
-            localStorage.setItem('gh_path', path);
-            localStorage.setItem('gh_token', token);
+/* ---------- ui helpers ---------- */
+function toast(msg,type='ok'){const t=$('toast');t.textContent=msg;t.className='fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-lg text-sm text-white shadow-lg '+(type==='err'?'bg-red-600':'bg-slate-800');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.add('hidden'),type==='err'?5000:2200)}
+function status(s){$('syncStatus').textContent=s}
+function toggleTheme(){const d=document.documentElement.classList.toggle('dark');localStorage.theme=d?'dark':'light';themeIcon()}
+function themeIcon(){$('themeBtn').textContent=document.documentElement.classList.contains('dark')?'☀️':'🌙'}
 
-            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-            
-            try {
-                const response = await fetch(url, {
-                    headers: { 'Authorization': `token ${token}` }
-                });
+/* ---------- github ---------- */
+const cfg=()=>({owner:$('repoOwner').value.trim(),repo:$('repoName').value.trim(),path:$('filePath').value.trim()||'schedule.json',token:$('githubToken').value.trim()});
+const apiUrl=c=>`https://api.github.com/repos/${c.owner}/${c.repo}/contents/${c.path}`;
+const hdr=c=>({'Authorization':'Bearer '+c.token,'Accept':'application/vnd.github+json'});
+const b64dec=b=>new TextDecoder().decode(Uint8Array.from(atob(b.replace(/\n/g,'')),c=>c.charCodeAt(0)));
+const b64enc=s=>{const u=new TextEncoder().encode(s);let b='';u.forEach(x=>b+=String.fromCharCode(x));return btoa(b)};
 
-                if (!response.ok) {
-                    if(response.status === 404) {
-                        scheduleData = [];
-                        renderTable();
-                        return;
-                    }
-                    throw new Error("ไม่สามารถโหลดไฟล์จาก GitHub ได้ (ตรวจสอบ Token หรือชื่อ Repo)");
-                }
+function saveConfig(){const c=cfg();if(!c.owner||!c.repo||!c.token){toast('กรอก Username, Repo และ Token ให้ครบ','err');return}
+  localStorage.gh_owner=c.owner;localStorage.gh_repo=c.repo;localStorage.gh_path=c.path;localStorage.gh_token=c.token;
+  $('configPanel').classList.add('hidden');load()}
+function clearConfig(){['owner','repo','path','token'].forEach(k=>localStorage.removeItem('gh_'+k));$('githubToken').value='';toast('ล้าง Token แล้ว')}
 
-                const data = await response.json();
-                fileSha = data.sha;
-                const decodedContent = JSON.parse(decodeURIComponent(escape(atob(data.content))));
-                scheduleData = Array.isArray(decodedContent) ? decodedContent : [];
-                renderTable();
-            } catch (error) {
-                document.getElementById('scheduleTable').innerHTML = `<tr><td colspan="7" class="p-6 text-center text-red-400">เกิดข้อผิดพลาด: ${error.message}</td></tr>`;
-            }
-        }
+async function fetchRemote(){
+  const c=cfg();const r=await fetch(apiUrl(c)+'?t='+Date.now(),{headers:hdr(c),cache:'no-store'});
+  if(r.status===404){sha='';data=[];return}
+  if(r.status===401||r.status===403)throw new Error('Token ไม่ถูกต้องหรือไม่มีสิทธิ์เขียน repo นี้');
+  if(!r.ok)throw new Error('โหลดไม่ได้ (HTTP '+r.status+') ตรวจสอบชื่อ Repo');
+  const j=await r.json();sha=j.sha;
+  const arr=JSON.parse(b64dec(j.content));
+  data=(Array.isArray(arr)?arr:[]).map(i=>({...i,id:i.id||uid(),priority:i.priority||'normal'}));
+}
+async function putRemote(){
+  const c=cfg();
+  const body={message:'Update schedule via web app v3.0',content:b64enc(JSON.stringify(data,null,2))};
+  if(sha)body.sha=sha;
+  const r=await fetch(apiUrl(c),{method:'PUT',headers:{...hdr(c),'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'HTTP '+r.status)}
+  sha=(await r.json()).content.sha;
+}
+async function load(silent){
+  if(!cfg().token){toggle('configPanel');return}
+  status('กำลังซิงค์…');
+  try{await fetchRemote();afterLoad()}
+  catch(e){status('⚠️ '+e.message);if(!silent)toast(e.message,'err')}
+}
+function afterLoad(){localStorage.cache_data=JSON.stringify(data);lastLoad=Date.now();status('✅ ซิงค์ล่าสุด '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' · '+data.length+' รายการ');render()}
 
-        async function saveDataToGitHub() {
-            const owner = document.getElementById('repoOwner').value.trim();
-            const repo = document.getElementById('repoName').value.trim();
-            const path = document.getElementById('filePath').value.trim();
-            const token = document.getElementById('githubToken').value.trim();
+/* โหลดข้อมูลล่าสุดก่อนแก้ทุกครั้ง เพื่อไม่เขียนทับงานที่คนอื่นเพิ่งเพิ่ม */
+async function mutate(fn,okMsg){
+  if(busy)return false;busy=true;status('กำลังบันทึก…');
+  try{await fetchRemote();fn();await putRemote();afterLoad();if(okMsg)toast(okMsg);return true}
+  catch(e){toast('ไม่สำเร็จ: '+e.message,'err');try{await fetchRemote();afterLoad()}catch{}return false}
+  finally{busy=false}
+}
 
-            const url = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-            const contentEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(scheduleData, null, 2))));
+/* ---------- render ---------- */
+function render(){
+  const kw=$('searchInput').value.toLowerCase(),sort=$('sortMode').value;
+  const act=data.filter(i=>!isDone(i));
+  const over=act.filter(i=>daysLeft(i)!==null&&daysLeft(i)<0);
+  const due0=act.filter(i=>daysLeft(i)===0);
+  const soon=act.filter(i=>{const d=daysLeft(i);return d!==null&&d>0&&d<=3});
+  const review=data.filter(i=>i.status==='🔍 รอตรวจ');
+  const stat=(n,l,c)=>`<div class="card !p-3"><div class="text-2xl font-bold ${c}">${n}</div><div class="text-xs text-slate-500 dark:text-slate-400">${l}</div></div>`;
+  $('stats').innerHTML=stat(act.length,'งานค้างทั้งหมด','')+stat(over.length,'เลยกำหนด','text-red-600')+stat(due0.length,'ส่งวันนี้','text-orange-500')+stat(soon.length,'ใน 3 วัน','text-amber-500')+stat(review.length,'รอตรวจ','text-blue-600');
 
-            const body = {
-                message: "Update schedule & review status via Web App (v2.0)",
-                content: contentEncoded,
-                sha: fileSha
-            };
+  const tabs=[['active','งานค้าง',act.length],['urgent','ด่วน/ใกล้ส่ง',over.length+due0.length+soon.length+act.filter(i=>i.priority==='high'&&!over.includes(i)&&!due0.includes(i)&&!soon.includes(i)).length],['review','รอตรวจ',review.length],['done','เสร็จแล้ว',data.length-act.length],['all','ทั้งหมด',data.length]];
+  $('tabs').innerHTML=tabs.map(([k,l,n])=>`<button onclick="tab='${k}';render()" class="px-3 py-1.5 rounded-full border ${tab===k?'bg-blue-600 text-white border-blue-600':'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600'}">${l} (${n})</button>`).join('');
 
-            const response = await fetch(url, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `token ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(body)
-            });
+  let rows=data.filter(i=>{
+    if(kw&&!((i.customer||'')+(i.details||'')+(i.feedback||'')).toLowerCase().includes(kw))return false;
+    const d=daysLeft(i);
+    if(tab==='active')return !isDone(i);
+    if(tab==='done')return isDone(i);
+    if(tab==='review')return i.status==='🔍 รอตรวจ';
+    if(tab==='urgent')return !isDone(i)&&(i.priority==='high'||(d!==null&&d<=3));
+    return true;
+  });
+  if(sort==='due')rows.sort((a,b)=>(a.noDate?1:0)-(b.noDate?1:0)||(a.date||'9').localeCompare(b.date||'9'));
+  if(sort==='recent')rows.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
 
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.message);
-            }
+  if(!rows.length){$('list').innerHTML=`<div class="card text-center text-slate-400 py-10">${data.length?'ไม่พบรายการในมุมมองนี้':'ยังไม่มีงาน กด “+ เพิ่มงานใหม่” เพื่อเริ่มต้น'}</div>`;return}
 
-            const resData = await response.json();
-            fileSha = resData.content.sha;
-        }
+  $('list').innerHTML=rows.map(i=>{
+    const d=daysLeft(i);let badge,border='border-slate-200 dark:border-slate-700';
+    if(isDone(i))badge=['อนุมัติ/เสร็จแล้ว','bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'];
+    else if(d===null)badge=['ไม่กำหนดวันส่ง','bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'];
+    else if(d<0){badge=['เลยกำหนด '+(-d)+' วัน','bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 font-bold'];border='border-red-400'}
+    else if(d===0){badge=['ส่งวันนี้'+(i.time?' '+i.time:''),'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300 font-bold'];border='border-orange-400'}
+    else if(d===1)badge=['พรุ่งนี้','bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 font-medium'];
+    else if(d<=3)badge=['อีก '+d+' วัน','bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'];
+    else badge=['อีก '+d+' วัน','bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300'];
+    const manual=sort==='manual'&&tab==='all'&&!kw;
+    return `<article class="fade card !p-3 border ${border} ${isDone(i)?'opacity-75':''}">
+      <div class="flex flex-wrap items-start gap-2">
+        <div class="flex-1 min-w-[200px]">
+          <div class="font-semibold">${i.priority==='high'?'<span class="text-red-600">🔺</span> ':''}${esc(i.customer)}</div>
+          <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">📥 ${esc(i.receiveDate||'-')} → 🏁 ${i.noDate?'ไม่กำหนด':esc(i.date||'-')}${i.time?' ⏰ '+esc(i.time):''}</div>
+        </div>
+        <span class="text-xs px-2 py-1 rounded-full ${badge[1]}">${badge[0]}</span>
+        <select onchange="setStatus('${i.id}',this.value)" class="text-xs border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 rounded-lg p-1.5" aria-label="สถานะ">${STATUSES.map(s=>`<option ${s===i.status?'selected':''}>${s}</option>`).join('')}</select>
+      </div>
+      ${i.details?`<div class="text-sm mt-2 whitespace-pre-line text-slate-700 dark:text-slate-300">${linkify(i.details)}</div>`:''}
+      ${i.feedback?`<div class="text-xs mt-2 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 text-blue-800 dark:text-blue-200 whitespace-pre-line">💬 ${linkify(i.feedback)}</div>`:''}
+      <div class="flex flex-wrap items-center gap-1.5 mt-3 text-xs">
+        ${isDone(i)?`<button onclick="setStatus('${i.id}','🔥 กำลังทำ')" class="btn !py-1">↩️ เปิดงานอีกครั้ง</button>`:`<button onclick="approve('${i.id}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg">👍 อนุมัติ</button><button onclick="requestFix('${i.id}')" class="btn !py-1">✏️ ขอแก้ไข</button>`}
+        <button onclick="openForm('${i.id}')" class="btn !py-1">แก้ไข</button>
+        <button onclick="dup('${i.id}')" class="btn !py-1">สำเนา</button>
+        <button onclick="del('${i.id}')" class="btn !py-1 text-red-600">ลบ</button>
+        ${manual?`<span class="ml-auto"><button onclick="move('${i.id}',-1)" class="btn !py-1" aria-label="เลื่อนขึ้น">⬆️</button> <button onclick="move('${i.id}',1)" class="btn !py-1" aria-label="เลื่อนลง">⬇️</button></span>`:''}
+      </div></article>`}).join('');
+}
 
-        function renderTable() {
-            const tbody = document.getElementById('scheduleTable');
-            const keyword = document.getElementById('searchInput').value.toLowerCase();
-            const selectedStatus = document.getElementById('filterStatus').value;
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+/* ---------- form ---------- */
+function syncNoDate(){const c=$('noDeliveryDate').checked,d=$('deliveryDate');d.disabled=c;if(c)d.value='';$('deliveryTime').disabled=c}
+function quickDue(n){$('noDeliveryDate').checked=false;syncNoDate();const d=new Date(todayStr()+'T00:00:00');d.setDate(d.getDate()+n);$('deliveryDate').value=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
+function openForm(id){
+  const i=id?data.find(x=>x.id===id):null;
+  $('editId').value=id||'';
+  $('formTitle').textContent=i?'แก้ไขงาน':'เพิ่มงานใหม่';
+  $('customerName').value=i?.customer||'';
+  $('receiveDate').value=i?.receiveDate||todayStr();
+  $('noDeliveryDate').checked=!!i?.noDate;
+  $('deliveryDate').value=i?.date||'';
+  $('deliveryTime').value=i?.time||'';
+  $('deliveryStatus').value=i?.status||STATUSES[1];
+  $('priority').value=i?.priority||'normal';
+  $('deliveryDetails').value=i?.details||'';
+  $('reviewerFeedback').value=i?.feedback||'';
+  syncNoDate();
+  $('formModal').classList.remove('hidden');
+  setTimeout(()=>$('customerName').focus(),50);
+}
+function closeForm(){$('formModal').classList.add('hidden')}
 
-            if (scheduleData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">ยังไม่มีรายการคิวส่งงาน</td></tr>`;
-                return;
-            }
+async function saveItem(){
+  const noDate=$('noDeliveryDate').checked;
+  const item={customer:$('customerName').value.trim(),receiveDate:$('receiveDate').value,noDate,date:noDate?'':$('deliveryDate').value,time:noDate?'':$('deliveryTime').value,status:$('deliveryStatus').value,priority:$('priority').value,details:$('deliveryDetails').value.trim(),feedback:$('reviewerFeedback').value.trim()};
+  if(!item.customer||!item.receiveDate)return toast('กรอกชื่อลูกค้าและวันรับงาน','err');
+  if(!noDate&&!item.date)return toast('เลือกวันส่ง หรือติ๊ก “ไม่กำหนด”','err');
+  const id=$('editId').value;const now=new Date().toISOString();
+  $('saveBtn').disabled=true;
+  const ok=await mutate(()=>{
+    if(id){const k=data.findIndex(x=>x.id===id);if(k<0)throw new Error('งานนี้ถูกลบไปแล้ว');const wasDone=isDone(data[k]);data[k]={...data[k],...item,updatedAt:now};if(isDone(item)&&!wasDone)data[k].approvedAt=now}
+    else data.unshift({id:uid(),...item,updatedAt:now,approvedAt:isDone(item)?now:''});
+  },id?'อัปเดตแล้ว':'เพิ่มงานแล้ว');
+  $('saveBtn').disabled=false;if(ok)closeForm();
+}
 
-            const filtered = scheduleData.map((item, originalIndex) => ({ ...item, originalIndex }))
-                .filter(item => {
-                    const matchKeyword = (item.customer || '').toLowerCase().includes(keyword) || (item.details || '').toLowerCase().includes(keyword);
-                    const matchStatus = selectedStatus === 'ALL' || item.status === selectedStatus;
-                    return matchKeyword && matchStatus;
-                });
+/* ---------- actions ---------- */
+const withItem=(id,fn,msg)=>mutate(()=>{const i=data.find(x=>x.id===id);if(!i)throw new Error('ไม่พบงานนี้ (อาจถูกลบไปแล้ว)');fn(i);i.updatedAt=new Date().toISOString()},msg);
+const stamp=()=>new Date().toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+const approve=id=>withItem(id,i=>{i.status='👍 Approved';i.approvedAt=new Date().toISOString();i.feedback=(i.feedback?i.feedback+'\n':'')+'✔ อนุมัติแล้ว '+stamp()},'อนุมัติแล้ว');
+function requestFix(id){const t=prompt('ระบุสิ่งที่ต้องแก้ไข:');if(t&&t.trim())withItem(id,i=>{i.status='🔥 กำลังทำ';i.feedback=(i.feedback?i.feedback+'\n':'')+'✏️ ขอแก้ ('+stamp()+'): '+t.trim()},'ส่งกลับให้แก้ไขแล้ว')}
+const setStatus=(id,s)=>withItem(id,i=>{i.status=s;if(DONE.includes(s))i.approvedAt=new Date().toISOString()},'เปลี่ยนสถานะแล้ว');
+function del(id){const i=data.find(x=>x.id===id);if(i&&confirm('ลบ “'+i.customer+'” ใช่หรือไม่?'))mutate(()=>{data=data.filter(x=>x.id!==id)},'ลบแล้ว')}
+const dup=id=>mutate(()=>{const k=data.findIndex(x=>x.id===id);if(k<0)return;const c={...data[k],id:uid(),customer:data[k].customer+' (สำเนา)',status:STATUSES[0],feedback:'',approvedAt:'',updatedAt:new Date().toISOString()};data.splice(k,0,c)},'สร้างสำเนาแล้ว');
+const move=(id,dir)=>mutate(()=>{const k=data.findIndex(x=>x.id===id),n=k+dir;if(k<0||n<0||n>=data.length)return;[data[k],data[n]]=[data[n],data[k]]});
 
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">ไม่พบรายการที่ค้นหา</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = filtered.map((item) => {
-                let badgeColor = "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300";
-                let dateBadge = "";
-
-                if (item.status === "👍 Approved" || item.status === "✅ เสร็จสิ้น") {
-                    badgeColor = "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 font-semibold";
-                    dateBadge = `<span class="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 font-medium">🟢 อนุมัติงานแล้ว</span>`;
-                } else if (item.noDate) {
-                    badgeColor = "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300";
-                    dateBadge = `<span class="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">⏳ ไม่ได้กำหนดวันส่ง</span>`;
-                } else if (item.date) {
-                    const itemDate = new Date(item.date);
-                    itemDate.setHours(0, 0, 0, 0);
-
-                    if (itemDate > today) {
-                        badgeColor = "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 font-medium";
-                        dateBadge = `<span class="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 font-medium">🟡 ก่อนถึงวันส่ง (${item.date})</span>`;
-                    } else {
-                        badgeColor = "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 font-bold";
-                        dateBadge = `<span class="inline-block mt-1 px-2 py-0.5 rounded text-xs bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 font-bold animate-pulse">🔴 ถึงวันส่งงาน (${item.date})</span>`;
-                    }
-                }
-
-                return `
-                    <tr class="hover:bg-gray-50/80 dark:hover:bg-gray-700/50 transition">
-                        <td class="p-3.5 font-medium text-gray-800 dark:text-gray-200">${item.customer}</td>
-                        <td class="p-3.5 text-gray-600 dark:text-gray-400 text-xs">
-                            <div>📥 รับงาน: ${item.receiveDate || '-'}</div>
-                            <div class="mt-0.5">🏁 กำหนดส่ง: ${item.noDate ? 'ไม่ได้กำหนด' : (item.date || '-')}</div>
-                            ${item.time ? `<div class="text-gray-500 dark:text-gray-400 mt-0.5">⏰ ${item.time}</div>` : ''}
-                        </td>
-                        <td class="p-3.5">
-                            <span class="px-2.5 py-1 rounded-full text-xs ${badgeColor}">${item.status || 'รอดำเนินการ'}</span>
-                            <div>${dateBadge}</div>
-                        </td>
-                        <td class="p-3.5 text-gray-600 dark:text-gray-300">
-                            <div class="whitespace-pre-line">${item.details || '-'}</div>
-                            ${item.feedback ? `<div class="text-xs text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 p-1.5 mt-1.5 rounded-lg border border-blue-100 dark:border-blue-800">💬 ความเห็นผู้ตรวจ: ${item.feedback}</div>` : ''}
-                        </td>
-                        <td class="p-3.5 text-center space-x-1">
-                            <button onclick="moveItem(${item.originalIndex}, -1)" class="text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-2.5 py-1 rounded text-xs" title="เลื่อนขึ้น">⬆️</button>
-                            <button onclick="moveItem(${item.originalIndex}, 1)" class="text-gray-500 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-2.5 py-1 rounded text-xs" title="เลื่อนลง">⬇️</button>
-                        </td>
-                        <td class="p-3.5 text-center">
-                            <button onclick="quickApprove(${item.originalIndex})" class="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg shadow-sm transition">👍 อนุมัติงาน</button>
-                        </td>
-                        <td class="p-3.5 text-center space-x-1">
-                            <button onclick="editItem(${item.originalIndex})" class="text-blue-600 dark:text-blue-400 hover:underline text-xs bg-blue-50 dark:bg-blue-900/40 px-2.5 py-1 rounded">แก้ไข</button>
-                            <button onclick="deleteItem(${item.originalIndex})" class="text-red-600 dark:text-red-400 hover:underline text-xs bg-red-50 dark:bg-red-900/40 px-2.5 py-1 rounded">ลบ</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        async function saveItem() {
-            const customer = document.getElementById('customerName').value.trim();
-            const receiveDate = document.getElementById('receiveDate').value;
-            const noDate = document.getElementById('noDeliveryDate').checked;
-            const date = noDate ? '' : document.getElementById('deliveryDate').value;
-            const time = document.getElementById('deliveryTime').value;
-            const status = document.getElementById('deliveryStatus').value;
-            const details = document.getElementById('deliveryDetails').value.trim();
-            const feedback = document.getElementById('reviewerFeedback').value.trim();
-            const editIndex = parseInt(document.getElementById('editIndex').value);
-
-            if (!customer || !receiveDate) {
-                alert("กรุณากรอกชื่อลูกค้าและวันรับงานให้เรียบร้อย");
-                return;
-            }
-
-            if (!noDate && !date) {
-                alert("กรุณาเลือกวันส่งงาน หรือติ๊กเลือก 'ไม่ได้กำหนด'");
-                return;
-            }
-
-            const itemData = { customer, receiveDate, date, noDate, time, status, details, feedback };
-
-            if (editIndex === -1) {
-                scheduleData.unshift(itemData);
-            } else {
-                scheduleData[editIndex] = itemData;
-            }
-            
-            try {
-                await saveDataToGitHub();
-                resetForm();
-                renderTable();
-                alert("บันทึกข้อมูลเรียบร้อย!");
-            } catch (error) {
-                alert("บันทึกไม่สำเร็จ: " + error.message);
-                loadData();
-            }
-        }
-
-        async function quickApprove(index) {
-            scheduleData[index].status = "👍 Approved";
-            scheduleData[index].feedback = (scheduleData[index].feedback ? scheduleData[index].feedback + " | " : "") + "อนุมัติเรียบร้อย";
-            try {
-                await saveDataToGitHub();
-                renderTable();
-            } catch (error) {
-                alert("อนุมัติไม่สำเร็จ: " + error.message);
-                loadData();
-            }
-        }
-
-        function editItem(index) {
-            const item = scheduleData[index];
-            document.getElementById('customerName').value = item.customer;
-            document.getElementById('receiveDate').value = item.receiveDate || new Date().toISOString().split('T')[0];
-            
-            const noDateCheckbox = document.getElementById('noDeliveryDate');
-            const deliveryDateInput = document.getElementById('deliveryDate');
-            
-            if (item.noDate) {
-                noDateCheckbox.checked = true;
-                deliveryDateInput.value = '';
-                deliveryDateInput.disabled = true;
-                deliveryDateInput.classList.add('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
-            } else {
-                noDateCheckbox.checked = false;
-                deliveryDateInput.value = item.date || '';
-                deliveryDateInput.disabled = false;
-                deliveryDateInput.classList.remove('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
-            }
-
-            document.getElementById('deliveryTime').value = item.time || '';
-            document.getElementById('deliveryStatus').value = item.status || "⏳ รอดำเนินการ";
-            document.getElementById('deliveryDetails').value = item.details || '';
-            document.getElementById('reviewerFeedback').value = item.feedback || '';
-            document.getElementById('editIndex').value = index;
-
-            document.getElementById('formTitle').innerText = "✏️ แก้ไขคิวส่งงาน / ฟีดแบ็ก";
-            document.getElementById('saveBtn').innerText = "อัปเดตข้อมูล";
-            document.getElementById('cancelBtn').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function resetForm() {
-            document.getElementById('customerName').value = '';
-            document.getElementById('receiveDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('deliveryDate').value = '';
-            document.getElementById('deliveryDate').disabled = false;
-            document.getElementById('deliveryDate').classList.remove('bg-gray-200', 'dark:bg-gray-600', 'cursor-not-allowed');
-            document.getElementById('noDeliveryDate').checked = false;
-            document.getElementById('deliveryTime').value = '';
-            document.getElementById('deliveryStatus').value = '🔥 กำลังทำ';
-            document.getElementById('deliveryDetails').value = '';
-            document.getElementById('reviewerFeedback').value = '';
-            document.getElementById('editIndex').value = '-1';
-
-            document.getElementById('formTitle').innerText = "➕ เพิ่มคิวส่งงานใหม่";
-            document.getElementById('saveBtn').innerText = "บันทึกคิวงานลงระบบ";
-            document.getElementById('cancelBtn').classList.add('hidden');
-        }
-
-        async function moveItem(index, direction) {
-            const newIndex = index + direction;
-            if (newIndex < 0 || newIndex >= scheduleData.length) return;
-
-            const temp = scheduleData[index];
-            scheduleData[index] = scheduleData[newIndex];
-            scheduleData[newIndex] = temp;
-
-            try {
-                await saveDataToGitHub();
-                renderTable();
-            } catch (error) {
-                alert("จัดลำดับไม่สำเร็จ: " + error.message);
-                loadData();
-            }
-        }
-
-        async function deleteItem(index) {
-            if (!confirm("ต้องการลบรายการนี้ใช่หรือไม่?")) return;
-            
-            scheduleData.splice(index, 1);
-            try {
-                await saveDataToGitHub();
-                renderTable();
-            } catch (error) {
-                alert("ลบไม่สำเร็จ: " + error.message);
-                loadData();
-            }
-        }
-    </script>
+/* ---------- export / share ---------- */
+function copySummary(){
+  const act=data.filter(i=>!isDone(i)).sort((a,b)=>(a.noDate?1:0)-(b.noDate?1:0)||(a.date||'9').localeCompare(b.date||'9'));
+  if(!act.length)return toast('ไม่มีงานค้าง');
+  const txt='📋 สรุปคิวงาน '+new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'})+'\n\n'+act.map((i,n)=>{const d=daysLeft(i);const w=d===null?'ไม่กำหนด':d<0?'เลย '+(-d)+' วัน':d===0?'วันนี้':i.date;return (n+1)+'. '+(i.priority==='high'?'🔺':'')+i.customer+' — '+w+(i.time?' '+i.time:'')+' ['+i.status+']'}).join('\n');
+  (navigator.clipboard?.writeText(txt)||Promise.reject()).then(()=>toast('คัดลอกสรุปแล้ว วางในไลน์ได้เลย')).catch(()=>prompt('คัดลอกข้อความนี้:',txt));
+}
+function exportCSV(){
+  const cols=[['customer','ลูกค้า'],['receiveDate','วันรับงาน'],['date','วันส่ง'],['time','เวลา'],['status','สถานะ'],['priority','ความสำคัญ'],['details','รายละเอียด'],['feedback','ความเห็นผู้ตรวจ']];
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const csv='\uFEFF'+cols.map(c=>q(c[1])).join(',')+'\n'+data.map(i=>cols.map(c=>q(i[c[0]])).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='schedule-'+todayStr()+'.csv';a.click();
+}
+</script>
 </body>
 </html>

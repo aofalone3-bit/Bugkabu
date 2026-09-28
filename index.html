@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delivery Schedule & Review System (Pro Edition)</title>
+    <title>Delivery Schedule & Review System (Pro Edition) v2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,12 +12,15 @@
     </script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 font-sans transition-colors duration-200">
-    <div class="w-[98%] mx-auto p-4 md:p-6">
+    <div class="w-[98%] mx-auto p-4 md:p-6 min-h-screen flex flex-col">
         <!-- Header & Theme Toggle -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 transition-colors">
             <div>
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">🚀 ระบบจัดการและตรวจคิวส่งงาน (Pro Workspace)</h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">ซิงค์ข้อมูลแบบเรียลไทม์ผ่าน GitHub สำหรับทีมงานและผู้ตรวจ</p>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-white flex items-center flex-wrap gap-2">
+                    🚀 ระบบจัดการและตรวจคิวส่งงาน (Pro Workspace)
+                    <span class="text-xs font-semibold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-full border border-blue-200 dark:border-blue-800">v2.0</span>
+                </h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">ซิงค์ข้อมูลแบบเรียลไทม์ผ่าน GitHub สำหรับทีมงานและผู้ตรวจ</p>
             </div>
             <div class="flex items-center gap-2">
                 <button id="themeToggleBtn" onclick="toggleDarkMode()" class="text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-3 py-2 rounded-lg transition border dark:border-gray-600 flex items-center gap-1.5">
@@ -110,10 +113,10 @@
         </div>
 
         <!-- Schedule Table -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-x-auto border border-gray-100 dark:border-gray-700 transition-colors">
+        <div class="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-x-auto border border-gray-100 dark:border-gray-700 transition-colors mb-6">
             <table class="w-full text-left border-collapse min-w-[950px]">
                 <thead>
-                    <tr class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs uppercase tracking-wider">
+                    <tr class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs uppercase tracking-wider border-b dark:border-gray-600">
                         <th class="p-3.5">ลูกค้า / งาน</th>
                         <th class="p-3.5">กำหนดการ & เวลา</th>
                         <th class="p-3.5">สถานะ</th>
@@ -128,6 +131,12 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Footer Version -->
+        <footer class="mt-auto pt-4 border-t dark:border-gray-800 text-center text-xs text-gray-400 dark:text-gray-500">
+            <p>Delivery Schedule & Review System <strong>v2.0</strong></p>
+            <p class="mt-1 opacity-70">Powered by Jamie (AI Assistant)</p>
+        </footer>
     </div>
 
     <script>
@@ -241,7 +250,7 @@
             const contentEncoded = btoa(unescape(encodeURIComponent(JSON.stringify(scheduleData, null, 2))));
 
             const body = {
-                message: "Update schedule & review status via Web App",
+                message: "Update schedule & review status via Web App (v2.0)",
                 content: contentEncoded,
                 sha: fileSha
             };

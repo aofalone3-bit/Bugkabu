@@ -6,12 +6,12 @@
     "noDate": false,
     "date": "2026-09-30",
     "time": "12:00",
-    "status": "⏳ รอดำเนินการ",
+    "status": "👍 Approved",
     "priority": "normal",
     "details": "บินโดรน ส่ง footage ให้สาขา KT",
-    "feedback": "",
-    "updatedAt": "2026-09-28T03:37:07.585Z",
-    "approvedAt": ""
+    "feedback": "✔ อนุมัติแล้ว 30 ก.ย.",
+    "updatedAt": "2026-09-30T06:23:46.478Z",
+    "approvedAt": "2026-09-30T06:23:46.478Z"
   },
   {
     "customer": "AW welcome back to school",

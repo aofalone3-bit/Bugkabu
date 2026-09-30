@@ -115,11 +115,12 @@
     "date": "",
     "noDate": true,
     "time": "",
-    "status": "⏳ รอดำเนินการ",
-    "details": "ถ่ายภาพ นักกีฬา จัดทำAW พิมพ์ติดโรงยิม (ครูอมยิ้ม)",
+    "status": "🔥 กำลังทำ",
+    "details": "ถ่ายภาพ นักกีฬา \nจัดทำAW พิมพ์ติดโรงยิม (ครูอมยิ้ม)",
     "feedback": "",
     "id": "mukp518e22mm",
-    "priority": "normal"
+    "priority": "normal",
+    "updatedAt": "2026-09-30T06:27:00.305Z"
   },
   {
     "customer": "AW ป้ายทางเข้า รร.",

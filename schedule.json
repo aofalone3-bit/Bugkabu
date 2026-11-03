@@ -11,21 +11,23 @@
     "details": "",
     "feedback": "",
     "updatedAt": "2026-11-03T02:22:26.997Z",
-    "approvedAt": ""
+    "approvedAt": "",
+    "mark": ""
   },
   {
     "id": "mw02ataok1nk",
     "customer": "ถ่ายภาพ ประชุมกรรมการ",
-    "receiveDate": "2026-11-16",
+    "receiveDate": "2026-11-11",
     "noDate": false,
-    "date": "2026-11-17",
+    "date": "2026-11-16",
     "time": "",
     "status": "⏳ รอดำเนินการ",
     "priority": "normal",
     "details": "",
     "feedback": "",
-    "updatedAt": "2026-11-03T02:21:47.773Z",
-    "approvedAt": ""
+    "updatedAt": "2026-11-03T02:54:31.001Z",
+    "approvedAt": "",
+    "mark": ""
   },
   {
     "id": "mukp518emu1v",
@@ -39,7 +41,8 @@
     "details": "บินโดรน ส่ง footage ให้สาขา KT",
     "feedback": "✔ อนุมัติแล้ว 30 ก.ย.",
     "updatedAt": "2026-09-30T06:23:46.478Z",
-    "approvedAt": "2026-09-30T06:23:46.478Z"
+    "approvedAt": "2026-09-30T06:23:46.478Z",
+    "mark": ""
   },
   {
     "customer": "AW welcome back to school",
@@ -51,7 +54,8 @@
     "details": "welcome back to school เทอม 2/2569 ค่ะ เอาไว้ post ก่อนถึงวันเปิดเรียน 3 วัน",
     "feedback": "อนุมัติเรียบร้อย",
     "id": "mukp518eok06",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "AW ปฎิทิน special course",
@@ -63,7 +67,8 @@
     "details": "ครูใหญ่อยากให้ทำปฎิทินเดือนนี้ช่วงสอบเสร็จ แล้วก็ special course และวันกลับมาเปิดเรียน อยู๋ใน 1 poster",
     "feedback": "อนุมัติเรียบร้อย",
     "id": "mukp518e0m1a",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "ถ่ายรูปพนักงาน",
@@ -75,7 +80,8 @@
     "details": "พนง. ไทย และต่างชาติ แต่งรูป",
     "feedback": "",
     "id": "mukp518elbvl",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "ตัดวีดีโอ KS Run",
@@ -87,7 +93,8 @@
     "details": "ตัดต่อใหม่ทั้งหมด",
     "feedback": "",
     "id": "mukp518eszm8",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "AW แต่งภาพแสดงความยินดี",
@@ -99,7 +106,8 @@
     "details": "ภาพแสดงความยินดีครูรับปริญญา + โพสเฟส",
     "feedback": "อนุมัติเรียบร้อย",
     "id": "mukp518ekpg5",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "AW ชอความร่วมมือ",
@@ -111,7 +119,8 @@
     "details": "การแต่งกายของ ผปค.",
     "feedback": "อนุมัติเรียบร้อย",
     "id": "mukp518eq51k",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "ถ่ายภาพกีฬาสี วันที่1",
@@ -123,7 +132,8 @@
     "details": "",
     "feedback": "อนุมัติเรียบร้อย",
     "id": "mukp518e4elw",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "ถ่าย วีดีโอ กีฬาสี",
@@ -135,7 +145,8 @@
     "details": "ถ่าย วีดีโอ/ภาพ กีฬาสีมัธยม วันที่ 5/9/69 (ครูโน่)\nทำโพสเฟสบุค",
     "feedback": "อนุมัติเรียบร้อย",
     "id": "mukp518ettv2",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "ถ่ายรูปทำ AW นักกีฬา",
@@ -148,7 +159,8 @@
     "feedback": "",
     "id": "mukp518e22mm",
     "priority": "normal",
-    "updatedAt": "2026-09-30T06:27:00.305Z"
+    "updatedAt": "2026-09-30T06:27:00.305Z",
+    "mark": ""
   },
   {
     "customer": "AW ป้ายทางเข้า รร.",
@@ -160,7 +172,8 @@
     "details": "AW ป้าย Logo KS+KIS ขนาด 3(ส)x1.5(ก) m ส่งร้านทำ ป้าย อะคิลิคแบลคลิส หน้า-หลัง\nตามใบเสนอราคา",
     "feedback": "อนุมัติเรียบร้อย",
     "id": "mukp518e6jgs",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "คอนเท็น วีดีโอรับสมัครอนุบาล",
@@ -172,7 +185,8 @@
     "details": "ออกแบบคอนเท็นการรับสมัคร อนุบาล ถ่ายทำ ตัดต่อ",
     "feedback": "",
     "id": "mukp518emaxu",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "ถ่ายรูปกีฬาสี KP",
@@ -184,7 +198,8 @@
     "details": "ถ่ายภาพกิจกรรม + แต่งภาพ + ส่งลิ้ง",
     "feedback": "อนุมัติเรียบร้อย",
     "id": "mukp518eiqqn",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "ถ่าย VTR + โดรน",
@@ -196,7 +211,8 @@
     "details": "งานซ่อมซีนวิ่ง KG สนามกอล์ฟ + โดรน\nส่งงาน https://drive.google.com/drive/folders/1oqVy4dJt0Q2j1X2zZS2zQ2ebLf8x-2kd?usp=sharing",
     "feedback": "อนุมัติเรียบร้อย",
     "id": "mukp518eejgk",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "ดีไซร์ AW บอร์ดศิษย์เก่า K.กล้า",
@@ -208,7 +224,8 @@
     "details": "ขอดีไซร์งานดราฟ",
     "feedback": "",
     "id": "mukp518edm7g",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "ดีไซร์ AW บอร์ดประชาสัมพันธ์ ให้ครู กล้า",
@@ -220,7 +237,8 @@
     "details": "ของาน ดราฟ 2-3 แบบ",
     "feedback": "",
     "id": "mukp518e43n4",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "AW ป้ายห้ามจอด",
@@ -229,7 +247,8 @@
     "details": "ครูใหญ่ขอป้าย NO PARKING ฟ้อนขนาด A3/ตัว",
     "feedback": "อนุมัติเรียบร้อย",
     "id": "mukp518e8gts",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "AW M.4 รอบภายใน",
@@ -241,7 +260,8 @@
     "details": "ออกแบบ 2-3 แบบ โพส 1/ก.ย/69",
     "feedback": "QR-Code ยังไม่ส่งมาให้กราฟิก ใส่ใน AW",
     "id": "mukp518ewajk",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "ถ่ายภาพกิจกรรมบริจาคเลือด",
@@ -250,7 +270,8 @@
     "details": "Z:\\#Marketing #\\2026",
     "feedback": "อนุมัติเรียบร้อย",
     "id": "mukp518edilo",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "AW เพื่อนชวนเพื่อน",
@@ -259,7 +280,8 @@
     "details": "ส่ง 26/8/69 โพส 1/ก.ย/69",
     "feedback": "โพสหน้าเฟสบุค วันที่ 1กันยายน 2569",
     "id": "mukp518erqeq",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "AW พี่ชวนน้อง",
@@ -268,7 +290,8 @@
     "details": "ส่ง 26/8/69 โพส 1/ก.ย/69",
     "feedback": "โพสหน้าเฟสบุค วันที่ 1กันยายน 2569 | อนุมัติเรียบร้อย",
     "id": "mukp518ezv94",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "AW M.1 โควต้า รอบภายใน",
@@ -280,7 +303,8 @@
     "details": "ออกแบบ 2-3 แบบ โพส 1/ก.ย/69",
     "feedback": "อนุมัติเรียบร้อย",
     "id": "mukp518e2j58",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "AW M.1 Star/Istar ภายในและภายนอก",
@@ -292,7 +316,8 @@
     "details": "ออกแบบ 2-3 แบบ โพส 1/ก.ย/69",
     "feedback": "",
     "id": "mukp518emskn",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   },
   {
     "customer": "AW ทุนภายใน M.1+M.4",
@@ -304,6 +329,7 @@
     "details": "ออกแบบ 2-3 แบบ โพส 1/ก.ย/69",
     "feedback": "",
     "id": "mukp518ecij5",
-    "priority": "normal"
+    "priority": "normal",
+    "mark": ""
   }
 ]

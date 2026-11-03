@@ -305,12 +305,14 @@
     "date": "2026-08-26",
     "noDate": false,
     "time": "",
-    "status": "⏳ รอดำเนินการ",
+    "status": "✅ เสร็จสิ้น",
     "details": "ออกแบบ 2-3 แบบ โพส 1/ก.ย/69",
     "feedback": "QR-Code ยังไม่ส่งมาให้กราฟิก ใส่ใน AW",
     "id": "mukp518ewajk",
     "priority": "normal",
-    "mark": ""
+    "mark": "",
+    "approvedAt": "2026-11-03T03:18:59.410Z",
+    "updatedAt": "2026-11-03T03:18:59.410Z"
   },
   {
     "customer": "ถ่ายภาพกิจกรรมบริจาคเลือด",

@@ -61,8 +61,8 @@
   .dlab{display:block;font-size:10.5px;line-height:1.35;padding:0 4px;border-radius:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .dlab.h{background:#fee2e2;color:#b91c1c}
   .dark .dlab.h{background:#4c1d24;color:#fca5a5}
-  .dlab.s{background:#ccfbf1;color:#0f766e}
-  .dark .dlab.s{background:#134e4a;color:#5eead4}
+  .dlab.s{background:#fde047;color:#713f12;font-weight:500}
+  .dark .dlab.s{background:#a16207;color:#fef9c3}
   .dlab.c{background:#e0e7ff;color:#4338ca}
   .dark .dlab.c{background:#312e81;color:#c7d2fe}
   .dlab.big{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 10px;border-radius:99px;white-space:normal}
@@ -519,7 +519,7 @@ function renderCalendar(rows){
     const more=list.length>3?`<span class="text-[11px] text-slate-500 dark:text-slate-400 px-1">+${list.length-3} อีก</span>`:'';
     const dots=list.slice(0,6).map(({i,t})=>`<span class="dot" style="--c:${mColor(i)};${isDone(i)?'opacity:.4':''}${t==='r'?';background:transparent;border:1.5px solid '+mColor(i):''}"></span>`).join('');
     grid+=`<button type="button" onclick="pickDay('${ds}')" class="cal-cell ${out?'out':''} ${isHol?'hol':''} ${ds===selDate?'sel':''}" aria-label="${esc(longDate(ds))}${info.length?' ('+esc(info.map(x=>x.name).join(', '))+')':''} ${list.length?list.length+' งาน':'ไม่มีงาน'}" aria-pressed="${ds===selDate}">
-      <span class="flex items-center justify-between"><span class="cal-num ${ds===today?'today':''} ${isHol?'hol':''} ${dt.getDay()===0&&ds!==today?'sun':''}">${dt.getDate()}</span><span class="flex items-center gap-1">${info.some(x=>x.type!=='h')?'<span class="dot md:hidden" style="--c:#0d9488"></span>':''}${late?'<span class="text-red-600 text-xs" title="มีงานเลยกำหนด">⚠</span>':''}</span></span>
+      <span class="flex items-center justify-between"><span class="cal-num ${ds===today?'today':''} ${isHol?'hol':''} ${dt.getDay()===0&&ds!==today?'sun':''}">${dt.getDate()}</span><span class="flex items-center gap-1">${info.some(x=>x.type!=='h')?'<span class="dot md:hidden" style="--c:#eab308"></span>':''}${late?'<span class="text-red-600 text-xs" title="มีงานเลยกำหนด">⚠</span>':''}</span></span>
       <span class="hidden md:flex flex-col gap-0.5 mt-1 min-w-0">${labels}${chips}${more}</span>
       <span class="md:hidden flex flex-wrap gap-1 mt-1">${dots}</span>
     </button>`;

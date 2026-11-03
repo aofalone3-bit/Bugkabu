@@ -56,6 +56,21 @@
   /* ---------- คิว ---------- */
   .qnum{display:inline-flex;width:28px;height:28px;border-radius:99px;background:#e2e8f0;font-weight:700;font-size:13px;align-items:center;justify-content:center;flex:none}
   .dark .qnum{background:#334155}
+
+  /* ---------- วันหยุด & วันสำคัญ ---------- */
+  .dlab{display:block;font-size:10.5px;line-height:1.35;padding:0 4px;border-radius:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dlab.h{background:#fee2e2;color:#b91c1c}
+  .dark .dlab.h{background:#4c1d24;color:#fca5a5}
+  .dlab.s{background:#ccfbf1;color:#0f766e}
+  .dark .dlab.s{background:#134e4a;color:#5eead4}
+  .dlab.c{background:#e0e7ff;color:#4338ca}
+  .dark .dlab.c{background:#312e81;color:#c7d2fe}
+  .dlab.big{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:3px 10px;border-radius:99px;white-space:normal}
+  .dlab.big button{border:0;background:transparent;color:inherit;cursor:pointer;padding:0 2px;font-size:12px;opacity:.7}
+  .cal-num.hol:not(.today){background:#fee2e2;color:#b91c1c}
+  .dark .cal-num.hol:not(.today){background:#4c1d24;color:#fca5a5}
+  .cal-cell.hol:not(.sel):not(.out){background:#fef2f2}
+  .dark .cal-cell.hol:not(.sel):not(.out){background:#2a1c24}
 </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors">
@@ -134,7 +149,7 @@
       <label class="lbl">วันรับงาน *<input type="date" id="receiveDate" class="inp mt-1"></label>
       <div class="lbl">วันส่งงาน
         <div class="flex gap-2 mt-1 items-center">
-          <input type="date" id="deliveryDate" class="inp flex-1">
+          <input type="date" id="deliveryDate" class="inp flex-1" onchange="updateDateHint()">
           <label class="flex items-center gap-1 whitespace-nowrap"><input type="checkbox" id="noDeliveryDate" onchange="syncNoDate()"> ไม่กำหนด</label>
         </div>
         <div class="flex gap-1 mt-1.5">
@@ -143,6 +158,7 @@
           <button type="button" class="chip" onclick="quickDue(3)">+3 วัน</button>
           <button type="button" class="chip" onclick="quickDue(7)">+7 วัน</button>
         </div>
+        <p id="dateHint" class="hidden text-xs font-normal text-amber-700 dark:text-amber-300 mt-1.5"></p>
       </div>
       <label class="lbl">เวลาส่ง<input type="time" id="deliveryTime" class="inp mt-1"></label>
       <label class="lbl">สถานะ
@@ -201,6 +217,58 @@ try{Object.assign(markLabels,JSON.parse(localStorage.mark_labels||'{}'))}catch{}
 const mLabel=k=>markLabels[k]||MARK_DEF[k]||'';
 const hasMark=i=>!!MARKS[i.mark];
 const mColor=i=>MARKS[i.mark]||'#94a3b8';
+
+/* ---------- วันหยุด & วันสำคัญ ---------- */
+/* วันหยุดปี 2569 อ้างอิงประกาศวันหยุดราชการ/ธนาคาร, ปี 2570 อ้างอิงปฏิทินวันหยุดสถาบันการเงินของ ธปท.
+   ปีอื่นใช้เฉพาะวันหยุดที่วันที่คงที่ (FIXED_HOL) จนกว่าจะมีประกาศ — เพิ่มปีใหม่ได้ที่ HOLIDAYS */
+const HOLIDAYS={
+  2026:[['01-01','วันขึ้นปีใหม่'],['01-02','วันหยุดพิเศษ'],['03-03','วันมาฆบูชา'],['04-06','วันจักรี'],['04-13','วันสงกรานต์'],['04-14','วันสงกรานต์'],['04-15','วันสงกรานต์'],['05-01','วันแรงงาน'],['05-04','วันฉัตรมงคล'],['05-31','วันวิสาขบูชา'],['06-01','ชดเชยวันวิสาขบูชา'],['06-03','เฉลิมพระชนมพรรษา พระราชินี'],['07-28','เฉลิมพระชนมพรรษา ร.10'],['07-29','วันอาสาฬหบูชา'],['07-30','วันเข้าพรรษา'],['08-12','วันแม่แห่งชาติ'],['10-13','วันนวมินทรมหาราช'],['10-23','วันปิยมหาราช'],['12-05','วันพ่อแห่งชาติ'],['12-07','ชดเชยวันพ่อแห่งชาติ'],['12-10','วันรัฐธรรมนูญ'],['12-31','วันสิ้นปี']],
+  2027:[['01-01','วันขึ้นปีใหม่'],['02-21','วันมาฆบูชา'],['02-22','ชดเชยวันมาฆบูชา'],['04-06','วันจักรี'],['04-13','วันสงกรานต์'],['04-14','วันสงกรานต์'],['04-15','วันสงกรานต์'],['05-01','วันแรงงาน'],['05-03','ชดเชยวันแรงงาน'],['05-04','วันฉัตรมงคล'],['05-20','วันวิสาขบูชา'],['06-03','เฉลิมพระชนมพรรษา พระราชินี'],['07-18','วันอาสาฬหบูชา'],['07-19','ชดเชยวันอาสาฬหบูชา'],['07-28','เฉลิมพระชนมพรรษา ร.10'],['08-12','วันแม่แห่งชาติ'],['10-13','วันนวมินทรมหาราช'],['10-23','วันปิยมหาราช'],['10-25','ชดเชยวันปิยมหาราช'],['12-05','วันพ่อแห่งชาติ'],['12-06','ชดเชยวันพ่อแห่งชาติ'],['12-10','วันรัฐธรรมนูญ'],['12-31','วันสิ้นปี']]
+};
+const FIXED_HOL=[['01-01','วันขึ้นปีใหม่'],['04-06','วันจักรี'],['04-13','วันสงกรานต์'],['04-14','วันสงกรานต์'],['04-15','วันสงกรานต์'],['05-01','วันแรงงาน'],['05-04','วันฉัตรมงคล'],['06-03','เฉลิมพระชนมพรรษา พระราชินี'],['07-28','เฉลิมพระชนมพรรษา ร.10'],['08-12','วันแม่แห่งชาติ'],['10-13','วันนวมินทรมหาราช'],['10-23','วันปิยมหาราช'],['12-05','วันพ่อแห่งชาติ'],['12-10','วันรัฐธรรมนูญ'],['12-31','วันสิ้นปี']];
+/* วันสำคัญ/ช่วงแคมเปญการตลาด (ไม่ใช่วันหยุด) */
+const SPECIAL_FIXED=[['01-16','วันครู'],['02-14','วันวาเลนไทน์'],['03-08','วันสตรีสากล'],['10-31','ฮาโลวีน'],['12-24','คริสต์มาสอีฟ'],['12-25','วันคริสต์มาส']];
+const SPECIAL_YEAR={2026:[['02-17','วันตรุษจีน'],['11-24','วันลอยกระทง']],2027:[['02-06','วันตรุษจีน'],['11-14','วันลอยกระทง']]};
+
+let showHol=localStorage.ui_hol!=='0',showSpc=localStorage.ui_spc!=='0';
+let customDays=[];try{customDays=JSON.parse(localStorage.custom_days||'[]')}catch{}
+const saveCustom=()=>localStorage.custom_days=JSON.stringify(customDays);
+const nth=(y,m,wd,n)=>1+((wd-new Date(y,m,1).getDay()+7)%7)+(n-1)*7; /* วันที่ของ "วัน wd ที่ n" ในเดือน m */
+const _yc={};
+function yearInfo(y){
+  if(_yc[y])return _yc[y];
+  const mp={},add=(md,type,name)=>(mp[y+'-'+md]=mp[y+'-'+md]||[]).push({type,name});
+  (HOLIDAYS[y]||FIXED_HOL).forEach(([md,n])=>add(md,'h',n));
+  SPECIAL_FIXED.forEach(([md,n])=>add(md,'s',n));
+  for(let m=2;m<=12;m++)add(pad(m)+'-'+pad(m),'s','แคมเปญ '+m+'.'+m);
+  (SPECIAL_YEAR[y]||[]).forEach(([md,n])=>add(md,'s',n));
+  add('01-'+pad(nth(y,0,6,2)),'s','วันเด็กแห่งชาติ');
+  const bf=nth(y,10,4,4)+1,cm=new Date(y,10,bf+3);
+  add('11-'+pad(bf),'s','แบล็กฟรายเดย์');
+  add(pad(cm.getMonth()+1)+'-'+pad(cm.getDate()),'s','ไซเบอร์มันเดย์');
+  return _yc[y]=mp;
+}
+const allInfo=ds=>(yearInfo(+ds.slice(0,4))[ds]||[]).concat(customDays.filter(c=>c.yearly?c.date.slice(5)===ds.slice(5):c.date===ds).map(c=>({type:'c',name:c.name,id:c.id})));
+const dayInfo=ds=>allInfo(ds).filter(x=>x.type==='h'?showHol:x.type==='s'?showSpc:true);
+const holName=ds=>ds?allInfo(ds).filter(x=>x.type==='h').map(x=>x.name).join(', '):'';
+function addCustomDay(ds){
+  const name=prompt('ชื่อวันสำคัญของ '+longDate(ds)+':');
+  if(!name||!name.trim())return;
+  const yearly=confirm('ให้วันนี้ซ้ำทุกปีหรือไม่?\n(ตกลง = ซ้ำทุกปี, ยกเลิก = ปีนี้ปีเดียว)');
+  customDays.push({id:uid(),date:ds,name:name.trim().slice(0,40),yearly});
+  saveCustom();render();toast('เพิ่มวันสำคัญแล้ว');
+}
+function delCustomDay(id){
+  const c=customDays.find(x=>x.id===id);
+  if(c&&confirm('ลบวันสำคัญ “'+c.name+'” ใช่หรือไม่?')){customDays=customDays.filter(x=>x.id!==id);saveCustom();render()}
+}
+function updateDateHint(){
+  const ds=$('noDeliveryDate').checked?'':$('deliveryDate').value,el=$('dateHint');
+  const parts=[];
+  if(ds){const h=holName(ds);if(h)parts.push('🎌 '+h+' (วันหยุด)');const wd=new Date(ds+'T00:00:00').getDay();if(wd===0||wd===6)parts.push(wd===0?'ตรงกับวันอาทิตย์':'ตรงกับวันเสาร์')}
+  el.textContent=parts.length?'⚠ วันส่งนี้ '+parts.join(' · '):'';
+  el.classList.toggle('hidden',!parts.length);
+}
 
 /* ---------- ui state ---------- */
 let view=localStorage.ui_view||'calendar';
@@ -311,7 +379,7 @@ function card(i,o={}){
       ${o.num?`<span class="qnum" title="คิวที่ ${o.num}">${o.num}</span>`:''}
       <div class="flex-1 min-w-[200px]">
         <div class="font-semibold">${i.priority==='high'?'<span class="text-red-600">🔺</span> ':''}${esc(i.customer)}${hasMark(i)?` <span class="mtag" style="--c:${mColor(i)}">${esc(mLabel(i.mark))}</span>`:''}</div>
-        <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">📥 ${esc(i.receiveDate||'-')} → 🏁 ${i.noDate?'ไม่กำหนด':esc(i.date||'-')}${i.time?' ⏰ '+esc(i.time):''}</div>
+        <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">📥 ${esc(i.receiveDate||'-')} → 🏁 ${i.noDate?'ไม่กำหนด':esc(i.date||'-')}${i.time?' ⏰ '+esc(i.time):''}${!isDone(i)&&!i.noDate&&holName(i.date)?` <span class="text-red-600 dark:text-red-400">🎌 ${esc(holName(i.date))}</span>`:''}</div>
       </div>
       <span class="text-xs px-2 py-1 rounded-full ${bc}">${bt}</span>
       <select onchange="setStatus('${i.id}',this.value)" class="text-xs border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 rounded-lg p-1.5" aria-label="สถานะ">${STATUSES.map(s=>`<option ${s===i.status?'selected':''}>${s}</option>`).join('')}</select>
@@ -414,7 +482,13 @@ function pickDay(ds){
   render();
   const p=$('dayPanel');if(p)p.scrollIntoView({block:'nearest'});
 }
-function setCalOpt(k,v){if(k==='recv'){showRecv=v;localStorage.ui_recv=v?'1':'0'}else{hideDone=v;localStorage.ui_hide=v?'1':'0'}render()}
+function setCalOpt(k,v){
+  if(k==='recv'){showRecv=v;localStorage.ui_recv=v?'1':'0'}
+  else if(k==='hol'){showHol=v;localStorage.ui_hol=v?'1':'0'}
+  else if(k==='spc'){showSpc=v;localStorage.ui_spc=v?'1':'0'}
+  else{hideDone=v;localStorage.ui_hide=v?'1':'0'}
+  render();
+}
 
 function renderCalendar(rows){
   const y=calY,m=calM,today=todayStr();
@@ -439,12 +513,14 @@ function renderCalendar(rows){
     const dt=new Date(y,m,c-lead+1),ds=fmt(dt.getFullYear(),dt.getMonth(),dt.getDate());
     const out=dt.getMonth()!==m,list=byDate[ds]||[];
     const late=list.some(x=>x.t==='d'&&!isDone(x.i)&&ds<today);
+    const info=dayInfo(ds),isHol=info.some(x=>x.type==='h');
+    const labels=info.slice(0,2).map(x=>`<span class="dlab ${x.type}" title="${esc(x.name)}">${esc(x.name)}</span>`).join('')+(info.length>2?`<span class="text-[11px] text-slate-500 dark:text-slate-400 px-1">+${info.length-2} วันสำคัญ</span>`:'');
     const chips=list.slice(0,3).map(({i,t})=>`<span class="cchip ${isDone(i)?'done':''} ${t==='d'&&!isDone(i)&&ds<today?'late':''} ${t==='r'?'recv':''}" style="--c:${mColor(i)}">${t==='r'?'📥 ':''}${i.priority==='high'&&t==='d'?'🔺':''}${t==='d'&&i.time?esc(i.time)+' ':''}${esc(i.customer)}</span>`).join('');
     const more=list.length>3?`<span class="text-[11px] text-slate-500 dark:text-slate-400 px-1">+${list.length-3} อีก</span>`:'';
     const dots=list.slice(0,6).map(({i,t})=>`<span class="dot" style="--c:${mColor(i)};${isDone(i)?'opacity:.4':''}${t==='r'?';background:transparent;border:1.5px solid '+mColor(i):''}"></span>`).join('');
-    grid+=`<button type="button" onclick="pickDay('${ds}')" class="cal-cell ${out?'out':''} ${ds===selDate?'sel':''}" aria-label="${esc(longDate(ds))} ${list.length?list.length+' งาน':'ไม่มีงาน'}" aria-pressed="${ds===selDate}">
-      <span class="flex items-center justify-between"><span class="cal-num ${ds===today?'today':''} ${dt.getDay()===0&&ds!==today?'sun':''}">${dt.getDate()}</span>${late?'<span class="text-red-600 text-xs" title="มีงานเลยกำหนด">⚠</span>':''}</span>
-      <span class="hidden md:flex flex-col gap-0.5 mt-1 min-w-0">${chips}${more}</span>
+    grid+=`<button type="button" onclick="pickDay('${ds}')" class="cal-cell ${out?'out':''} ${isHol?'hol':''} ${ds===selDate?'sel':''}" aria-label="${esc(longDate(ds))}${info.length?' ('+esc(info.map(x=>x.name).join(', '))+')':''} ${list.length?list.length+' งาน':'ไม่มีงาน'}" aria-pressed="${ds===selDate}">
+      <span class="flex items-center justify-between"><span class="cal-num ${ds===today?'today':''} ${isHol?'hol':''} ${dt.getDay()===0&&ds!==today?'sun':''}">${dt.getDate()}</span><span class="flex items-center gap-1">${info.some(x=>x.type!=='h')?'<span class="dot md:hidden" style="--c:#0d9488"></span>':''}${late?'<span class="text-red-600 text-xs" title="มีงานเลยกำหนด">⚠</span>':''}</span></span>
+      <span class="hidden md:flex flex-col gap-0.5 mt-1 min-w-0">${labels}${chips}${more}</span>
       <span class="md:hidden flex flex-wrap gap-1 mt-1">${dots}</span>
     </button>`;
   }
@@ -463,21 +539,27 @@ function renderCalendar(rows){
     <div class="flex flex-wrap gap-4 text-xs mb-2 text-slate-600 dark:text-slate-300">
       <label class="flex items-center gap-1.5"><input type="checkbox" ${showRecv?'checked':''} onchange="setCalOpt('recv',this.checked)"> แสดงวันรับงาน (กรอบเส้นประ)</label>
       <label class="flex items-center gap-1.5"><input type="checkbox" ${hideDone?'checked':''} onchange="setCalOpt('done',this.checked)"> ซ่อนงานที่เสร็จแล้ว</label>
+      <label class="flex items-center gap-1.5"><input type="checkbox" ${showHol?'checked':''} onchange="setCalOpt('hol',this.checked)"> <span class="dlab h !inline-block">🎌 วันหยุด</span></label>
+      <label class="flex items-center gap-1.5"><input type="checkbox" ${showSpc?'checked':''} onchange="setCalOpt('spc',this.checked)"> <span class="dlab s !inline-block">✨ วันสำคัญ/แคมเปญ</span></label>
       ${noDate?`<span class="text-slate-500">มี ${noDate} งานที่ยังไม่กำหนดวันส่ง (ดูในแท็บ “คิวงาน”)</span>`:''}
     </div>
     <div class="cal-grid rounded-xl overflow-hidden border-t border-l border-slate-200 dark:border-slate-700 shadow-sm" role="grid">${grid}</div>
     <div id="dayPanel" class="mt-4 space-y-2">
       <div class="flex flex-wrap items-center gap-2 justify-between">
         <h3 class="font-semibold">${esc(longDate(selDate))}</h3>
-        <button onclick="openForm('','${selDate}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium">+ เพิ่มงานส่งวันนี้</button>
+        <div class="flex gap-2">
+          <button onclick="addCustomDay('${selDate}')" class="btn !py-1.5 text-xs">+ วันสำคัญ</button>
+          <button onclick="openForm('','${selDate}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium">+ เพิ่มงานส่งวันนี้</button>
+        </div>
       </div>
+      ${dayInfo(selDate).length?`<div class="flex flex-wrap gap-1.5">${dayInfo(selDate).map(x=>`<span class="dlab big ${x.type}">${x.type==='h'?'🎌':x.type==='s'?'✨':'⭐'} ${esc(x.name)}${x.type==='c'?`<button type="button" onclick="delCustomDay('${x.id}')" aria-label="ลบวันสำคัญ ${esc(x.name)}">✕</button>`:''}</span>`).join('')}</div>`:''}
       ${panel}
     </div>`;
 }
 
 /* ---------- form ---------- */
-function syncNoDate(){const c=$('noDeliveryDate').checked,d=$('deliveryDate');d.disabled=c;if(c)d.value='';$('deliveryTime').disabled=c}
-function quickDue(n){$('noDeliveryDate').checked=false;syncNoDate();const d=new Date(todayStr()+'T00:00:00');d.setDate(d.getDate()+n);$('deliveryDate').value=fmt(d.getFullYear(),d.getMonth(),d.getDate())}
+function syncNoDate(){const c=$('noDeliveryDate').checked,d=$('deliveryDate');d.disabled=c;if(c)d.value='';$('deliveryTime').disabled=c;updateDateHint()}
+function quickDue(n){$('noDeliveryDate').checked=false;syncNoDate();const d=new Date(todayStr()+'T00:00:00');d.setDate(d.getDate()+n);$('deliveryDate').value=fmt(d.getFullYear(),d.getMonth(),d.getDate());updateDateHint()}
 function pickMark(k){$('markVal').value=k;renderMarkPick()}
 function renderMarkPick(){
   const cur=$('markVal').value;

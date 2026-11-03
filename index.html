@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ระบบจัดการคิวส่งงาน v4.0</title>
+<title>ระบบจัดการคิวส่งงาน v4.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -51,6 +51,10 @@
   .cchip.late{color:#dc2626;font-weight:600}
   .dark .cchip.late{color:#f87171}
   .cchip.recv{background:transparent;border:1px dashed var(--c);border-left:3px solid var(--c)}
+  /* ช่วงทำงานหลายวัน */
+  .cchip.w{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--c) 28%,transparent) 0 5px,color-mix(in srgb,var(--c) 12%,transparent) 5px 10px);border-left-color:transparent}
+  .cchip.w.ws{border-left-color:var(--c)}
+  .cchip.w.we{border-right:3px solid var(--c)}
   @media (min-width:768px){.cal-cell{min-height:6.75rem;padding:4px 5px}}
 
   /* ---------- คิว ---------- */
@@ -79,7 +83,7 @@
   <!-- Header -->
   <header class="flex flex-wrap items-center justify-between gap-3 mb-4">
     <div>
-      <h1 class="text-xl md:text-2xl font-bold">📋 คิวส่งงาน & ตรวจงาน <span class="text-xs font-semibold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full align-middle">v4.0</span></h1>
+      <h1 class="text-xl md:text-2xl font-bold">📋 คิวส่งงาน & ตรวจงาน <span class="text-xs font-semibold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full align-middle">v4.1</span></h1>
       <p id="syncStatus" class="text-xs text-slate-500 dark:text-slate-400 mt-1">ยังไม่ได้เชื่อมต่อ</p>
     </div>
     <div class="flex flex-wrap gap-2 text-xs">
@@ -135,7 +139,7 @@
   <section id="calendarView" class="hidden"></section>
   <main id="list" class="space-y-2"></main>
 
-  <footer class="text-center text-xs text-slate-400 mt-8">ระบบคิวส่งงาน v4.0 · ซิงค์อัตโนมัติทุก 60 วินาที · ทางลัด: N = งานใหม่, / = ค้นหา</footer>
+  <footer class="text-center text-xs text-slate-400 mt-8">ระบบคิวส่งงาน v4.1 · ซิงค์อัตโนมัติทุก 60 วินาที · ทางลัด: N = งานใหม่, / = ค้นหา</footer>
 </div>
 
 <!-- Form modal -->
@@ -149,7 +153,7 @@
       <label class="lbl">วันรับงาน *<input type="date" id="receiveDate" class="inp mt-1"></label>
       <div class="lbl">วันส่งงาน
         <div class="flex gap-2 mt-1 items-center">
-          <input type="date" id="deliveryDate" class="inp flex-1" onchange="updateDateHint()">
+          <input type="date" id="deliveryDate" class="inp flex-1" onchange="updateDateHint();updateMultiHint()">
           <label class="flex items-center gap-1 whitespace-nowrap"><input type="checkbox" id="noDeliveryDate" onchange="syncNoDate()"> ไม่กำหนด</label>
         </div>
         <div class="flex gap-1 mt-1.5">
@@ -159,6 +163,23 @@
           <button type="button" class="chip" onclick="quickDue(7)">+7 วัน</button>
         </div>
         <p id="dateHint" class="hidden text-xs font-normal text-amber-700 dark:text-amber-300 mt-1.5"></p>
+      </div>
+      <div class="lbl md:col-span-2 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+        <label class="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-200"><input type="checkbox" id="multiDay" onchange="syncMulti()"> 🛠 ทำงานหลายวัน (กำหนดช่วงเวลาทำงาน เช่น วันที่ 1–5)</label>
+        <div id="multiBox" class="hidden mt-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label class="lbl">เริ่มทำงาน<input type="date" id="workStart" class="inp mt-1" onchange="updateMultiHint()"></label>
+            <label class="lbl">ทำงานถึงวันที่<input type="date" id="workEnd" class="inp mt-1" onchange="updateMultiHint()"></label>
+          </div>
+          <div class="flex flex-wrap gap-1 mt-1.5">
+            <button type="button" class="chip" onclick="setSpan(2)">2 วัน</button>
+            <button type="button" class="chip" onclick="setSpan(3)">3 วัน</button>
+            <button type="button" class="chip" onclick="setSpan(5)">5 วัน</button>
+            <button type="button" class="chip" onclick="setSpan(7)">7 วัน</button>
+            <button type="button" class="chip" onclick="endAtDelivery()">สิ้นสุดวันส่งงาน</button>
+          </div>
+          <p id="multiHint" class="hidden text-xs font-normal mt-1.5"></p>
+        </div>
       </div>
       <label class="lbl">เวลาส่ง<input type="time" id="deliveryTime" class="inp mt-1"></label>
       <label class="lbl">สถานะ
@@ -209,6 +230,11 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const isDone=i=>DONE.includes(i.status);
 const daysLeft=i=>(!i.date||i.noDate)?null:Math.round((new Date(i.date+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/864e5);
 const toggle=id=>$(id).classList.toggle('hidden');
+const addDays=(ds,n)=>{const d=new Date(ds+'T00:00:00');d.setDate(d.getDate()+n);return fmt(d.getFullYear(),d.getMonth(),d.getDate())};
+const spanDays=(a,b)=>Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/864e5)+1;
+const hasRange=i=>!!i.workStart&&!!i.workEnd&&i.workEnd>=i.workStart;
+const shortDate=ds=>new Date(ds+'T00:00:00').toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+const rangeText=i=>shortDate(i.workStart)+(i.workEnd!==i.workStart?' – '+shortDate(i.workEnd):'')+' ('+spanDays(i.workStart,i.workEnd)+' วัน)';
 const longDate=ds=>new Date(ds+'T00:00:00').toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 
 /* ---------- มาร์คสี ---------- */
@@ -328,7 +354,7 @@ async function fetchRemote(){
 }
 async function putRemote(){
   const c=cfg();
-  const body={message:'Update schedule via web app v4.0',content:b64enc(JSON.stringify(data,null,2))};
+  const body={message:'Update schedule via web app v4.1',content:b64enc(JSON.stringify(data,null,2))};
   if(sha)body.sha=sha;
   const r=await fetch(apiUrl(c),{method:'PUT',headers:{...hdr(c),'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'HTTP '+r.status)}
@@ -379,7 +405,7 @@ function card(i,o={}){
       ${o.num?`<span class="qnum" title="คิวที่ ${o.num}">${o.num}</span>`:''}
       <div class="flex-1 min-w-[200px]">
         <div class="font-semibold">${i.priority==='high'?'<span class="text-red-600">🔺</span> ':''}${esc(i.customer)}${hasMark(i)?` <span class="mtag" style="--c:${mColor(i)}">${esc(mLabel(i.mark))}</span>`:''}</div>
-        <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">📥 ${esc(i.receiveDate||'-')} → 🏁 ${i.noDate?'ไม่กำหนด':esc(i.date||'-')}${i.time?' ⏰ '+esc(i.time):''}${!isDone(i)&&!i.noDate&&holName(i.date)?` <span class="text-red-600 dark:text-red-400">🎌 ${esc(holName(i.date))}</span>`:''}</div>
+        <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">📥 ${esc(i.receiveDate||'-')} → 🏁 ${i.noDate?'ไม่กำหนด':esc(i.date||'-')}${i.time?' ⏰ '+esc(i.time):''}${!isDone(i)&&!i.noDate&&holName(i.date)?` <span class="text-red-600 dark:text-red-400">🎌 ${esc(holName(i.date))}</span>`:''}</div>${hasRange(i)?`<div class="text-xs text-indigo-600 dark:text-indigo-300 mt-0.5">🛠 ช่วงทำงาน ${esc(rangeText(i))}</div>`:''}
       </div>
       <span class="text-xs px-2 py-1 rounded-full ${bc}">${bt}</span>
       <select onchange="setStatus('${i.id}',this.value)" class="text-xs border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 rounded-lg p-1.5" aria-label="สถานะ">${STATUSES.map(s=>`<option ${s===i.status?'selected':''}>${s}</option>`).join('')}</select>
@@ -499,8 +525,15 @@ function renderCalendar(rows){
     const hasD=i.date&&!i.noDate;
     if(hasD)(byDate[i.date]=byDate[i.date]||[]).push({i,t:'d'});
     if(showRecv&&i.receiveDate&&i.receiveDate!==i.date)(byDate[i.receiveDate]=byDate[i.receiveDate]||[]).push({i,t:'r'});
+    if(hasRange(i)){
+      const total=spanDays(i.workStart,i.workEnd);let ds=i.workStart,k=0;
+      while(ds<=i.workEnd&&k<400){k++;
+        if(!(hasD&&ds===i.date))(byDate[ds]=byDate[ds]||[]).push({i,t:'w',n:k,total,ws:k===1,we:ds===i.workEnd});
+        ds=addDays(ds,1)}
+    }
   });
-  Object.values(byDate).forEach(a=>a.sort((p,q)=>(p.t==='r')-(q.t==='r')||byTime(p.i,q.i)));
+  const RK={d:0,w:1,r:2};
+  Object.values(byDate).forEach(a=>a.sort((p,q)=>(RK[p.t]-RK[q.t])||(p.t==='w'?(p.i.workStart||'').localeCompare(q.i.workStart||'')||String(p.i.id).localeCompare(String(q.i.id)):byTime(p.i,q.i))));
 
   const title=new Date(y,m,1).toLocaleDateString('th-TH',{month:'long',year:'numeric'});
   const prefix=y+'-'+pad(m+1);
@@ -515,9 +548,9 @@ function renderCalendar(rows){
     const late=list.some(x=>x.t==='d'&&!isDone(x.i)&&ds<today);
     const info=dayInfo(ds),isHol=info.some(x=>x.type==='h');
     const labels=info.slice(0,2).map(x=>`<span class="dlab ${x.type}" title="${esc(x.name)}">${esc(x.name)}</span>`).join('')+(info.length>2?`<span class="text-[11px] text-slate-500 dark:text-slate-400 px-1">+${info.length-2} วันสำคัญ</span>`:'');
-    const chips=list.slice(0,3).map(({i,t})=>`<span class="cchip ${isDone(i)?'done':''} ${t==='d'&&!isDone(i)&&ds<today?'late':''} ${t==='r'?'recv':''}" style="--c:${mColor(i)}">${t==='r'?'📥 ':''}${i.priority==='high'&&t==='d'?'🔺':''}${t==='d'&&i.time?esc(i.time)+' ':''}${esc(i.customer)}</span>`).join('');
+    const chips=list.slice(0,3).map(({i,t,ws,we})=>`<span class="cchip ${isDone(i)?'done':''} ${t==='d'&&!isDone(i)&&ds<today?'late':''} ${t==='r'?'recv':''} ${t==='w'?'w'+(ws?' ws':'')+(we?' we':''):''}" style="--c:${mColor(i)}">${t==='r'?'📥 ':''}${t==='w'&&ws?'🛠 ':''}${i.priority==='high'&&t==='d'?'🔺':''}${t==='d'&&i.time?esc(i.time)+' ':''}${esc(i.customer)}</span>`).join('');
     const more=list.length>3?`<span class="text-[11px] text-slate-500 dark:text-slate-400 px-1">+${list.length-3} อีก</span>`:'';
-    const dots=list.slice(0,6).map(({i,t})=>`<span class="dot" style="--c:${mColor(i)};${isDone(i)?'opacity:.4':''}${t==='r'?';background:transparent;border:1.5px solid '+mColor(i):''}"></span>`).join('');
+    const dots=list.slice(0,6).map(({i,t})=>`<span class="dot" style="--c:${mColor(i)};${isDone(i)?'opacity:.4':''}${t==='r'?';background:transparent;border:1.5px solid '+mColor(i):''}${t==='w'?';width:14px;border-radius:2px;opacity:.65':''}"></span>`).join('');
     grid+=`<button type="button" onclick="pickDay('${ds}')" class="cal-cell ${out?'out':''} ${isHol?'hol':''} ${ds===selDate?'sel':''}" aria-label="${esc(longDate(ds))}${info.length?' ('+esc(info.map(x=>x.name).join(', '))+')':''} ${list.length?list.length+' งาน':'ไม่มีงาน'}" aria-pressed="${ds===selDate}">
       <span class="flex items-center justify-between"><span class="cal-num ${ds===today?'today':''} ${isHol?'hol':''} ${dt.getDay()===0&&ds!==today?'sun':''}">${dt.getDate()}</span><span class="flex items-center gap-1">${info.some(x=>x.type!=='h')?'<span class="dot md:hidden" style="--c:#eab308"></span>':''}${late?'<span class="text-red-600 text-xs" title="มีงานเลยกำหนด">⚠</span>':''}</span></span>
       <span class="hidden md:flex flex-col gap-0.5 mt-1 min-w-0">${labels}${chips}${more}</span>
@@ -526,7 +559,7 @@ function renderCalendar(rows){
   }
 
   const sel=byDate[selDate]||[];
-  const panel=sel.length?sel.map(({i,t})=>(t==='r'?'<div class="text-xs text-slate-500 dark:text-slate-400 mt-2 -mb-1">📥 รับงานวันนี้</div>':'')+card(i)).join(''):`<div class="card text-center text-slate-400 py-8">ไม่มีงานในวันนี้</div>`;
+  const panel=sel.length?sel.map(({i,t,n,total})=>(t==='r'?'<div class="text-xs text-slate-500 dark:text-slate-400 mt-2 -mb-1">📥 รับงานวันนี้</div>':t==='w'?'<div class="text-xs text-indigo-600 dark:text-indigo-300 mt-2 -mb-1">🛠 ช่วงทำงาน วันที่ '+n+' จาก '+total+' วัน</div>':'')+card(i)).join(''):`<div class="card text-center text-slate-400 py-8">ไม่มีงานในวันนี้</div>`;
 
   $('calendarView').innerHTML=`
     <div class="flex flex-wrap items-center gap-2 mb-2">
@@ -558,7 +591,40 @@ function renderCalendar(rows){
 }
 
 /* ---------- form ---------- */
-function syncNoDate(){const c=$('noDeliveryDate').checked,d=$('deliveryDate');d.disabled=c;if(c)d.value='';$('deliveryTime').disabled=c;updateDateHint()}
+function syncNoDate(){const c=$('noDeliveryDate').checked,d=$('deliveryDate');d.disabled=c;if(c)d.value='';$('deliveryTime').disabled=c;updateDateHint();updateMultiHint()}
+/* ---- ช่วงทำงานหลายวัน ---- */
+function applyMulti(){$('multiBox').classList.toggle('hidden',!$('multiDay').checked)}
+function syncMulti(){
+  applyMulti();
+  if($('multiDay').checked){
+    if(!$('workStart').value)$('workStart').value=$('receiveDate').value||todayStr();
+    if(!$('workEnd').value){const dd=$('noDeliveryDate').checked?'':$('deliveryDate').value,st=$('workStart').value;$('workEnd').value=(dd&&dd>=st)?dd:st}
+  }
+  updateMultiHint();
+}
+function setSpan(n){if(!$('workStart').value)$('workStart').value=todayStr();$('workEnd').value=addDays($('workStart').value,n-1);updateMultiHint()}
+function endAtDelivery(){
+  const dd=$('noDeliveryDate').checked?'':$('deliveryDate').value;
+  if(!dd)return toast('ยังไม่ได้เลือกวันส่งงาน','err');
+  if(!$('workStart').value)$('workStart').value=$('receiveDate').value||todayStr();
+  $('workEnd').value=dd;updateMultiHint();
+}
+function updateMultiHint(){
+  const el=$('multiHint');if(!el)return;
+  const on=$('multiDay').checked,s=$('workStart').value,e=$('workEnd').value;
+  let msg='',cls='text-slate-600 dark:text-slate-300';
+  if(on&&s&&e){
+    if(e<s){msg='⚠ วันสิ้นสุดต้องไม่ก่อนวันเริ่มทำงาน';cls='text-red-600 dark:text-red-400'}
+    else{
+      const total=spanDays(s,e);msg='🛠 รวม '+total+' วัน';
+      let h=0,k=0,ds=s;while(ds<=e&&k<400){k++;if(holName(ds))h++;ds=addDays(ds,1)}
+      if(h)msg+=' · มีวันหยุดนักขัตฤกษ์ '+h+' วัน';
+      const dd=$('noDeliveryDate').checked?'':$('deliveryDate').value;
+      if(dd&&e>dd){msg+=' · ⚠ สิ้นสุดหลังวันส่งงาน';cls='text-amber-700 dark:text-amber-300'}
+    }
+  }
+  el.textContent=msg;el.className='text-xs font-normal mt-1.5 '+cls+(msg?'':' hidden');
+}
 function quickDue(n){$('noDeliveryDate').checked=false;syncNoDate();const d=new Date(todayStr()+'T00:00:00');d.setDate(d.getDate()+n);$('deliveryDate').value=fmt(d.getFullYear(),d.getMonth(),d.getDate());updateDateHint()}
 function pickMark(k){$('markVal').value=k;renderMarkPick()}
 function renderMarkPick(){
@@ -579,6 +645,7 @@ function openForm(id,presetDate){
   $('priority').value=i?.priority||'normal';
   $('deliveryDetails').value=i?.details||'';
   $('reviewerFeedback').value=i?.feedback||'';
+  $('multiDay').checked=!!i?.workStart;$('workStart').value=i?.workStart||'';$('workEnd').value=i?.workEnd||'';applyMulti();
   $('markVal').value=i?.mark||markFilter||'';
   renderMarkPick();
   syncNoDate();
@@ -589,9 +656,15 @@ function closeForm(){$('formModal').classList.add('hidden')}
 
 async function saveItem(){
   const noDate=$('noDeliveryDate').checked;
-  const item={customer:$('customerName').value.trim(),receiveDate:$('receiveDate').value,noDate,date:noDate?'':$('deliveryDate').value,time:noDate?'':$('deliveryTime').value,status:$('deliveryStatus').value,priority:$('priority').value,mark:$('markVal').value,details:$('deliveryDetails').value.trim(),feedback:$('reviewerFeedback').value.trim()};
+  const item={customer:$('customerName').value.trim(),receiveDate:$('receiveDate').value,noDate,date:noDate?'':$('deliveryDate').value,time:noDate?'':$('deliveryTime').value,status:$('deliveryStatus').value,priority:$('priority').value,mark:$('markVal').value,workStart:'',workEnd:'',details:$('deliveryDetails').value.trim(),feedback:$('reviewerFeedback').value.trim()};
   if(!item.customer||!item.receiveDate)return toast('กรอกชื่อลูกค้าและวันรับงาน','err');
   if(!noDate&&!item.date)return toast('เลือกวันส่ง หรือติ๊ก “ไม่กำหนด”','err');
+  if($('multiDay').checked){
+    const ws=$('workStart').value,we=$('workEnd').value;
+    if(!ws||!we)return toast('กรอกวันเริ่มและวันสิ้นสุดการทำงาน หรือเอาติ๊ก “ทำงานหลายวัน” ออก','err');
+    if(we<ws)return toast('วันสิ้นสุดการทำงานต้องไม่ก่อนวันเริ่ม','err');
+    item.workStart=ws;item.workEnd=we;
+  }
   const id=$('editId').value;const now=new Date().toISOString();
   $('saveBtn').disabled=true;
   const ok=await mutate(()=>{
@@ -619,19 +692,19 @@ function download(name,type,content){const a=document.createElement('a');a.href=
 function copySummary(){
   const act=data.filter(i=>!isDone(i)).sort(byDue);
   if(!act.length)return toast('ไม่มีงานค้าง');
-  const txt='📋 สรุปคิวงาน '+new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'})+'\n\n'+act.map((i,n)=>{const d=daysLeft(i);const w=d===null?'ไม่กำหนด':d<0?'เลย '+(-d)+' วัน':d===0?'วันนี้':d===1?'พรุ่งนี้':i.date;return (n+1)+'. '+(i.priority==='high'?'🔺':'')+i.customer+' — '+w+(i.time?' '+i.time:'')+' ['+i.status+']'}).join('\n');
+  const txt='📋 สรุปคิวงาน '+new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'})+'\n\n'+act.map((i,n)=>{const d=daysLeft(i);const w=d===null?'ไม่กำหนด':d<0?'เลย '+(-d)+' วัน':d===0?'วันนี้':d===1?'พรุ่งนี้':i.date;return (n+1)+'. '+(i.priority==='high'?'🔺':'')+i.customer+' — '+w+(i.time?' '+i.time:'')+(hasRange(i)?' 🛠 ทำงาน '+rangeText(i):'')+' ['+i.status+']'}).join('\n');
   (navigator.clipboard?.writeText(txt)||Promise.reject()).then(()=>toast('คัดลอกสรุปแล้ว วางในไลน์ได้เลย')).catch(()=>prompt('คัดลอกข้อความนี้:',txt));
 }
 function exportCSV(){
-  const cols=[['customer','ลูกค้า'],['receiveDate','วันรับงาน'],['date','วันส่ง'],['time','เวลา'],['status','สถานะ'],['priority','ความสำคัญ'],['mark','มาร์ค'],['details','รายละเอียด'],['feedback','ความเห็นผู้ตรวจ']];
+  const cols=[['customer','ลูกค้า'],['receiveDate','วันรับงาน'],['workStart','เริ่มทำงาน'],['workEnd','ทำงานถึง'],['date','วันส่ง'],['time','เวลา'],['status','สถานะ'],['priority','ความสำคัญ'],['mark','มาร์ค'],['details','รายละเอียด'],['feedback','ความเห็นผู้ตรวจ']];
   const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
   const val=(i,k)=>k==='mark'?(hasMark(i)?mLabel(i.mark):''):i[k];
   const csv='\uFEFF'+cols.map(c=>q(c[1])).join(',')+'\n'+data.map(i=>cols.map(c=>q(val(i,c[0]))).join(',')).join('\n');
   download('schedule-'+todayStr()+'.csv','text/csv;charset=utf-8',csv);
 }
 function exportICS(){
-  const act=data.filter(i=>!isDone(i)&&i.date&&!i.noDate);
-  if(!act.length)return toast('ไม่มีงานค้างที่กำหนดวันส่งให้ส่งออก','err');
+  const act=data.filter(i=>!isDone(i)&&i.date&&!i.noDate),works=data.filter(i=>!isDone(i)&&hasRange(i));
+  if(!act.length&&!works.length)return toast('ไม่มีงานค้างที่กำหนดวันส่งให้ส่งออก','err');
   const t=s=>String(s??'').replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');
   const compact=d=>d.replace(/-/g,'');
   const now=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
@@ -647,9 +720,14 @@ function exportICS(){
     }
     L.push('SUMMARY:'+t((i.priority==='high'?'🔺 ':'')+i.customer),'DESCRIPTION:'+t((i.details||'')+(hasMark(i)?'\nมาร์ค: '+mLabel(i.mark):'')+'\nสถานะ: '+i.status),'END:VEVENT');
   });
+  works.forEach(i=>{
+    const n=addDays(i.workEnd,1);
+    L.push('BEGIN:VEVENT','UID:'+i.id+'-work@schedule-app','DTSTAMP:'+now,'DTSTART;VALUE=DATE:'+compact(i.workStart),'DTEND;VALUE=DATE:'+compact(n),
+      'SUMMARY:'+t('🛠 '+i.customer+' (ช่วงทำงาน)'),'DESCRIPTION:'+t((i.details||'')+'\nสถานะ: '+i.status),'TRANSP:TRANSPARENT','END:VEVENT');
+  });
   L.push('END:VCALENDAR');
   download('schedule-'+todayStr()+'.ics','text/calendar;charset=utf-8',L.join('\r\n'));
-  toast('ส่งออก '+act.length+' งานแล้ว นำเข้า Google Calendar ได้เลย');
+  toast('ส่งออก '+act.length+' งาน'+(works.length?' + ช่วงทำงาน '+works.length+' รายการ':'')+' แล้ว นำเข้า Google Calendar ได้เลย');
 }
 </script>
 </body>

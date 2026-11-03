@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ระบบจัดการคิวส่งงาน v3.0</title>
+<title>ระบบจัดการคิวส่งงาน v4.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={darkMode:'class'}</script>
 <style>
@@ -11,6 +14,48 @@
   .fade{animation:f .2s ease}@keyframes f{from{opacity:0;transform:translateY(4px)}to{opacity:1}}
   @media (prefers-reduced-motion:reduce){.fade{animation:none}}
   :focus-visible{outline:2px solid #2563eb;outline-offset:2px}
+
+  /* ---------- มาร์คสี ---------- */
+  .dot{width:8px;height:8px;border-radius:99px;background:var(--c,#94a3b8);display:inline-block;flex:none}
+  .markbtn{width:18px;height:18px;border-radius:99px;background:var(--c);border:2px solid transparent;padding:0;cursor:pointer}
+  .markbtn.on{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--c)}
+  .dark .markbtn.on{box-shadow:0 0 0 2px #1e293b,0 0 0 4px var(--c)}
+  .mtag{font-size:11px;font-weight:500;padding:1px 7px;border-radius:99px;vertical-align:middle;
+        background:color-mix(in srgb,var(--c) 16%,transparent);color:color-mix(in srgb,var(--c) 72%,#000)}
+  .dark .mtag{color:color-mix(in srgb,var(--c) 70%,#fff)}
+  .mpick{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid #cbd5e1;background:transparent}
+  .dark .mpick{border-color:#475569}
+  .mpick.on{border-color:var(--c,#475569);background:color-mix(in srgb,var(--c,#475569) 16%,transparent);font-weight:600}
+
+  /* ---------- ปฏิทิน ---------- */
+  .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+  .cal-head{font-size:12px;font-weight:600;text-align:center;padding:6px 0;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;background:#f1f5f9}
+  .dark .cal-head{background:#0f172a;border-color:#334155}
+  .cal-cell{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;text-align:left;
+            min-height:4.25rem;padding:3px;border:0;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;
+            background:#fff;color:inherit;font:inherit;cursor:pointer;min-width:0;overflow:hidden}
+  .dark .cal-cell{background:#1e293b;border-color:#334155}
+  .cal-cell.out{background:#f8fafc;color:#94a3b8}
+  .dark .cal-cell.out{background:#172033;color:#64748b}
+  .cal-cell.sel{background:#eff6ff}
+  .dark .cal-cell.sel{background:#1e3a5f}
+  .cal-cell:hover{background:#f1f5f9}
+  .dark .cal-cell:hover{background:#273449}
+  .cal-num{font-size:12px;font-weight:600;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:99px;flex:none}
+  .cal-num.today{background:#2563eb;color:#fff}
+  .cal-num.sun{color:#dc2626}
+  .cchip{display:block;width:100%;text-align:left;font-size:11px;line-height:1.35;padding:1px 4px;border-radius:4px;
+         border-left:3px solid var(--c);background:color-mix(in srgb,var(--c) 15%,transparent);
+         overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cchip.done{text-decoration:line-through;opacity:.55}
+  .cchip.late{color:#dc2626;font-weight:600}
+  .dark .cchip.late{color:#f87171}
+  .cchip.recv{background:transparent;border:1px dashed var(--c);border-left:3px solid var(--c)}
+  @media (min-width:768px){.cal-cell{min-height:6.75rem;padding:4px 5px}}
+
+  /* ---------- คิว ---------- */
+  .qnum{display:inline-flex;width:28px;height:28px;border-radius:99px;background:#e2e8f0;font-weight:700;font-size:13px;align-items:center;justify-content:center;flex:none}
+  .dark .qnum{background:#334155}
 </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors">
@@ -19,14 +64,15 @@
   <!-- Header -->
   <header class="flex flex-wrap items-center justify-between gap-3 mb-4">
     <div>
-      <h1 class="text-xl md:text-2xl font-bold">📋 คิวส่งงาน & ตรวจงาน <span class="text-xs font-semibold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full align-middle">v3.0</span></h1>
+      <h1 class="text-xl md:text-2xl font-bold">📋 คิวส่งงาน & ตรวจงาน <span class="text-xs font-semibold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full align-middle">v4.0</span></h1>
       <p id="syncStatus" class="text-xs text-slate-500 dark:text-slate-400 mt-1">ยังไม่ได้เชื่อมต่อ</p>
     </div>
     <div class="flex flex-wrap gap-2 text-xs">
       <button onclick="copySummary()" class="btn">📋 คัดลอกสรุป (ส่งไลน์)</button>
+      <button onclick="exportICS()" class="btn" title="นำเข้า Google Calendar / Apple Calendar">📆 ICS</button>
       <button onclick="exportCSV()" class="btn">⬇️ CSV</button>
       <button onclick="load()" class="btn">🔄 รีเฟรช</button>
-      <button onclick="toggleTheme()" id="themeBtn" class="btn">🌙</button>
+      <button onclick="toggleTheme()" id="themeBtn" class="btn" aria-label="สลับโหมดมืด/สว่าง">🌙</button>
       <button onclick="toggle('configPanel')" class="btn">⚙️ ตั้งค่า</button>
     </div>
   </header>
@@ -38,12 +84,17 @@
       <input id="repoOwner" placeholder="GitHub Username / Org" value="aofalone3-bit" class="inp">
       <input id="repoName" placeholder="Repository" value="Bugkabu" class="inp">
       <input id="filePath" placeholder="ไฟล์ข้อมูล" value="schedule.json" class="inp">
-      <div class="flex gap-1"><input id="githubToken" type="password" placeholder="Token (PAT)" class="inp flex-1 min-w-0"><button type="button" class="btn" onclick="const t=githubToken;t.type=t.type==='password'?'text':'password'">👁</button></div>
+      <div class="flex gap-1"><input id="githubToken" type="password" placeholder="Token (PAT)" class="inp flex-1 min-w-0"><button type="button" class="btn" onclick="const t=githubToken;t.type=t.type==='password'?'text':'password'" aria-label="แสดง/ซ่อน Token">👁</button></div>
     </div>
     <p class="text-xs text-amber-700 dark:text-amber-300 mt-2">🔒 Token เก็บในเบราว์เซอร์เครื่องนี้เท่านั้น แนะนำใช้ Fine-grained token ที่ให้สิทธิ์ Contents: Read and write เฉพาะ repo นี้ และไม่ใช้บนเครื่องสาธารณะ</p>
     <div class="flex gap-2 mt-3">
       <button onclick="saveConfig()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">บันทึกและเชื่อมต่อ</button>
       <button onclick="clearConfig()" class="btn">ล้าง Token</button>
+    </div>
+    <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700">
+      <h3 class="font-semibold text-sm mb-1">ตั้งชื่อมาร์คสี</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">เช่น แดง = งานด่วนลูกค้า A, เขียว = งานโซเชียล (เก็บในเครื่องนี้)</p>
+      <div id="markLabelInputs" class="grid grid-cols-2 md:grid-cols-7 gap-2"></div>
     </div>
   </section>
 
@@ -53,19 +104,23 @@
   <!-- Toolbar -->
   <div class="flex flex-col md:flex-row gap-2 mb-3">
     <button onclick="openForm()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm">+ เพิ่มงานใหม่</button>
-    <input id="searchInput" oninput="render()" placeholder="🔍 ค้นหาชื่อลูกค้า / รายละเอียด" class="inp flex-1">
-    <select id="sortMode" onchange="render()" class="inp md:w-52">
+    <input id="searchInput" oninput="render()" placeholder="🔍 ค้นหาชื่อลูกค้า / รายละเอียด  (กด / เพื่อค้นหา)" class="inp flex-1">
+    <select id="sortMode" onchange="render()" class="inp md:w-52" aria-label="เรียงลำดับ">
       <option value="manual">เรียงตามที่จัดเอง</option>
       <option value="due">เรียงตามวันส่ง (ใกล้สุดก่อน)</option>
       <option value="recent">อัปเดตล่าสุด</option>
     </select>
   </div>
+
+  <div id="viewTabs" class="flex gap-1 p-1 rounded-xl bg-slate-200/70 dark:bg-slate-800 mb-3 text-sm w-full md:w-fit" role="tablist"></div>
+  <div id="markBar" class="flex flex-wrap items-center gap-1.5 mb-3 text-xs"></div>
   <div id="tabs" class="flex flex-wrap gap-1.5 mb-4 text-xs"></div>
 
-  <!-- List -->
+  <!-- Views -->
+  <section id="calendarView" class="hidden"></section>
   <main id="list" class="space-y-2"></main>
 
-  <footer class="text-center text-xs text-slate-400 mt-8">ระบบคิวส่งงาน v3.0 · ซิงค์อัตโนมัติทุก 60 วินาที</footer>
+  <footer class="text-center text-xs text-slate-400 mt-8">ระบบคิวส่งงาน v4.0 · ซิงค์อัตโนมัติทุก 60 วินาที · ทางลัด: N = งานใหม่, / = ค้นหา</footer>
 </div>
 
 <!-- Form modal -->
@@ -73,6 +128,7 @@
   <div class="card w-full max-w-2xl fade" onkeydown="if((event.ctrlKey||event.metaKey)&&event.key==='Enter')saveItem()">
     <h2 id="formTitle" class="font-semibold mb-3">เพิ่มงานใหม่</h2>
     <input type="hidden" id="editId">
+    <input type="hidden" id="markVal">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <label class="lbl md:col-span-2">ชื่อลูกค้า / ชิ้นงาน *<input id="customerName" class="inp mt-1" placeholder="เช่น คุณสมชาย – โปสเตอร์ A3"></label>
       <label class="lbl">วันรับงาน *<input type="date" id="receiveDate" class="inp mt-1"></label>
@@ -95,6 +151,9 @@
       <label class="lbl">ความสำคัญ
         <select id="priority" class="inp mt-1"><option value="normal">ปกติ</option><option value="high">🔺 ด่วน</option></select>
       </label>
+      <div class="lbl">มาร์คสี
+        <div id="markPick" class="flex flex-wrap gap-1.5 mt-1.5"></div>
+      </div>
       <label class="lbl md:col-span-2">รายละเอียดงาน (วางลิงก์ Drive ได้ กดเปิดได้เลย)<textarea id="deliveryDetails" rows="3" class="inp mt-1"></textarea></label>
       <label class="lbl md:col-span-2">ความเห็นจากผู้ตรวจ<textarea id="reviewerFeedback" rows="2" class="inp mt-1 !bg-yellow-50 dark:!bg-yellow-900/30"></textarea></label>
     </div>
@@ -119,16 +178,35 @@
 <script>
 const STATUSES=['⏳ รอดำเนินการ','🔥 กำลังทำ','🔍 รอตรวจ','👍 Approved','✅ เสร็จสิ้น'];
 const DONE=['👍 Approved','✅ เสร็จสิ้น'];
+const MARKS={red:'#dc2626',orange:'#ea580c',yellow:'#ca8a04',green:'#16a34a',blue:'#2563eb',purple:'#9333ea',pink:'#db2777'};
+const MARK_DEF={red:'แดง',orange:'ส้ม',yellow:'เหลือง',green:'เขียว',blue:'ฟ้า',purple:'ม่วง',pink:'ชมพู'};
+const WD=['อา','จ','อ','พ','พฤ','ศ','ส'];
 let data=[],sha='',tab='active',busy=false,lastLoad=0;
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const linkify=s=>esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener" class="text-blue-600 dark:text-blue-400 underline break-all">$1</a>');
-const todayStr=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const pad=n=>String(n).padStart(2,'0');
+const fmt=(y,m,d)=>y+'-'+pad(m+1)+'-'+pad(d);
+const todayStr=()=>{const d=new Date();return fmt(d.getFullYear(),d.getMonth(),d.getDate())};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const isDone=i=>DONE.includes(i.status);
 const daysLeft=i=>(!i.date||i.noDate)?null:Math.round((new Date(i.date+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/864e5);
 const toggle=id=>$(id).classList.toggle('hidden');
+const longDate=ds=>new Date(ds+'T00:00:00').toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+/* ---------- มาร์คสี ---------- */
+let markLabels={...MARK_DEF};
+try{Object.assign(markLabels,JSON.parse(localStorage.mark_labels||'{}'))}catch{}
+const mLabel=k=>markLabels[k]||MARK_DEF[k]||'';
+const hasMark=i=>!!MARKS[i.mark];
+const mColor=i=>MARKS[i.mark]||'#94a3b8';
+
+/* ---------- ui state ---------- */
+let view=localStorage.ui_view||'calendar';
+if(!['calendar','queue','list'].includes(view))view='calendar';
+let markFilter='',showRecv=localStorage.ui_recv==='1',hideDone=localStorage.ui_hide==='1';
+const _t=new Date();let calY=_t.getFullYear(),calM=_t.getMonth(),selDate=todayStr();
 
 /* ---------- init ---------- */
 window.onload=()=>{
@@ -136,12 +214,20 @@ window.onload=()=>{
   themeIcon();
   $('deliveryStatus').innerHTML=STATUSES.map(s=>`<option>${s}</option>`).join('');
   ['owner','repo','path','token'].forEach(k=>{const v=localStorage['gh_'+k];if(v)$({owner:'repoOwner',repo:'repoName',path:'filePath',token:'githubToken'}[k]).value=v});
+  $('markLabelInputs').innerHTML=Object.keys(MARKS).map(k=>`<label class="flex items-center gap-1.5" style="--c:${MARKS[k]}"><span class="dot"></span><input class="inp !p-1.5" value="${esc(mLabel(k))}" maxlength="20" oninput="setMarkLabel('${k}',this.value)" aria-label="ชื่อมาร์ค ${esc(MARK_DEF[k])}"></label>`).join('');
   try{data=JSON.parse(localStorage.cache_data||'[]')}catch{data=[]}
   render();
   if(localStorage.gh_owner&&localStorage.gh_repo&&localStorage.gh_token)load();
   else{$('configPanel').classList.remove('hidden');status('ยังไม่ได้เชื่อมต่อ GitHub')}
   setInterval(()=>{if(!busy&&$('formModal').classList.contains('hidden')&&!document.hidden&&cfg().token)load(true)},60000);
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeForm()});
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){closeForm();return}
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    const tg=e.target.tagName;if(['INPUT','TEXTAREA','SELECT'].includes(tg))return;
+    if(!$('formModal').classList.contains('hidden'))return;
+    if(e.key==='n'||e.key==='N'){e.preventDefault();openForm('',view==='calendar'?selDate:'')}
+    if(e.key==='/'){e.preventDefault();$('searchInput').focus()}
+  });
 };
 
 /* ---------- ui helpers ---------- */
@@ -149,6 +235,7 @@ function toast(msg,type='ok'){const t=$('toast');t.textContent=msg;t.className='
 function status(s){$('syncStatus').textContent=s}
 function toggleTheme(){const d=document.documentElement.classList.toggle('dark');localStorage.theme=d?'dark':'light';themeIcon()}
 function themeIcon(){$('themeBtn').textContent=document.documentElement.classList.contains('dark')?'☀️':'🌙'}
+function setMarkLabel(k,v){markLabels[k]=v.trim()||MARK_DEF[k];localStorage.mark_labels=JSON.stringify(markLabels);render()}
 
 /* ---------- github ---------- */
 const cfg=()=>({owner:$('repoOwner').value.trim(),repo:$('repoName').value.trim(),path:$('filePath').value.trim()||'schedule.json',token:$('githubToken').value.trim()});
@@ -169,11 +256,11 @@ async function fetchRemote(){
   if(!r.ok)throw new Error('โหลดไม่ได้ (HTTP '+r.status+') ตรวจสอบชื่อ Repo');
   const j=await r.json();sha=j.sha;
   const arr=JSON.parse(b64dec(j.content));
-  data=(Array.isArray(arr)?arr:[]).map(i=>({...i,id:i.id||uid(),priority:i.priority||'normal'}));
+  data=(Array.isArray(arr)?arr:[]).map(i=>({...i,id:i.id||uid(),priority:i.priority||'normal',mark:MARKS[i.mark]?i.mark:''}));
 }
 async function putRemote(){
   const c=cfg();
-  const body={message:'Update schedule via web app v3.0',content:b64enc(JSON.stringify(data,null,2))};
+  const body={message:'Update schedule via web app v4.0',content:b64enc(JSON.stringify(data,null,2))};
   if(sha)body.sha=sha;
   const r=await fetch(apiUrl(c),{method:'PUT',headers:{...hdr(c),'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'HTTP '+r.status)}
@@ -195,22 +282,92 @@ async function mutate(fn,okMsg){
   finally{busy=false}
 }
 
+/* ---------- shared render helpers ---------- */
+function visible(){
+  const kw=$('searchInput').value.trim().toLowerCase();
+  return data.filter(i=>(!markFilter||i.mark===markFilter)&&(!kw||((i.customer||'')+(i.details||'')+(i.feedback||'')).toLowerCase().includes(kw)));
+}
+const byTime=(a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99');
+const byDue=(a,b)=>(a.noDate?1:0)-(b.noDate?1:0)||(a.date||'9').localeCompare(b.date||'9')||byTime(a,b)||((b.priority==='high')-(a.priority==='high'));
+
+function badgeOf(i){
+  const d=daysLeft(i);
+  if(isDone(i))return ['อนุมัติ/เสร็จแล้ว','bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',''];
+  if(d===null)return ['ไม่กำหนดวันส่ง','bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',''];
+  if(d<0)return ['เลยกำหนด '+(-d)+' วัน','bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 font-bold','border-red-400'];
+  if(d===0)return ['ส่งวันนี้'+(i.time?' '+i.time:''),'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300 font-bold','border-orange-400'];
+  if(d===1)return ['พรุ่งนี้'+(i.time?' '+i.time:''),'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 font-medium',''];
+  if(d<=3)return ['อีก '+d+' วัน','bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',''];
+  return ['อีก '+d+' วัน','bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',''];
+}
+
+const markDots=i=>`<span class="inline-flex items-center gap-1.5" role="group" aria-label="มาร์คสี">${Object.keys(MARKS).map(k=>`<button type="button" class="markbtn ${i.mark===k?'on':''}" style="--c:${MARKS[k]}" title="${esc(mLabel(k))}" aria-label="มาร์ค ${esc(mLabel(k))}" aria-pressed="${i.mark===k}" onclick="setMark('${i.id}','${k}')"></button>`).join('')}</span>`;
+
+function card(i,o={}){
+  const [bt,bc,bd]=badgeOf(i);
+  const mk=hasMark(i)?`border-left:4px solid ${mColor(i)}`:'';
+  return `<article class="fade card !p-3 border ${bd||'border-slate-200 dark:border-slate-700'} ${isDone(i)?'opacity-75':''}" style="${mk}">
+    <div class="flex flex-wrap items-start gap-2">
+      ${o.num?`<span class="qnum" title="คิวที่ ${o.num}">${o.num}</span>`:''}
+      <div class="flex-1 min-w-[200px]">
+        <div class="font-semibold">${i.priority==='high'?'<span class="text-red-600">🔺</span> ':''}${esc(i.customer)}${hasMark(i)?` <span class="mtag" style="--c:${mColor(i)}">${esc(mLabel(i.mark))}</span>`:''}</div>
+        <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">📥 ${esc(i.receiveDate||'-')} → 🏁 ${i.noDate?'ไม่กำหนด':esc(i.date||'-')}${i.time?' ⏰ '+esc(i.time):''}</div>
+      </div>
+      <span class="text-xs px-2 py-1 rounded-full ${bc}">${bt}</span>
+      <select onchange="setStatus('${i.id}',this.value)" class="text-xs border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 rounded-lg p-1.5" aria-label="สถานะ">${STATUSES.map(s=>`<option ${s===i.status?'selected':''}>${s}</option>`).join('')}</select>
+    </div>
+    ${i.details?`<div class="text-sm mt-2 whitespace-pre-line text-slate-700 dark:text-slate-300">${linkify(i.details)}</div>`:''}
+    ${i.feedback?`<div class="text-xs mt-2 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 text-blue-800 dark:text-blue-200 whitespace-pre-line">💬 ${linkify(i.feedback)}</div>`:''}
+    <div class="flex flex-wrap items-center gap-1.5 mt-3 text-xs">
+      ${isDone(i)?`<button onclick="setStatus('${i.id}','🔥 กำลังทำ')" class="btn !py-1">↩️ เปิดงานอีกครั้ง</button>`:`<button onclick="approve('${i.id}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg">👍 อนุมัติ</button><button onclick="requestFix('${i.id}')" class="btn !py-1">✏️ ขอแก้ไข</button>`}
+      <button onclick="openForm('${i.id}')" class="btn !py-1">แก้ไข</button>
+      <button onclick="dup('${i.id}')" class="btn !py-1">สำเนา</button>
+      <button onclick="del('${i.id}')" class="btn !py-1 text-red-600">ลบ</button>
+      <span class="ml-auto inline-flex items-center gap-3">${markDots(i)}${o.manual?`<span><button onclick="move('${i.id}',-1)" class="btn !py-1" aria-label="เลื่อนขึ้น">⬆️</button> <button onclick="move('${i.id}',1)" class="btn !py-1" aria-label="เลื่อนลง">⬇️</button></span>`:''}</span>
+    </div></article>`;
+}
+
 /* ---------- render ---------- */
+function setView(v){view=v;localStorage.ui_view=v;render()}
+function goList(t){tab=t;setView('list')}
+function setMarkFilter(k){markFilter=markFilter===k?'':k;render()}
+
 function render(){
-  const kw=$('searchInput').value.toLowerCase(),sort=$('sortMode').value;
   const act=data.filter(i=>!isDone(i));
   const over=act.filter(i=>daysLeft(i)!==null&&daysLeft(i)<0);
   const due0=act.filter(i=>daysLeft(i)===0);
   const soon=act.filter(i=>{const d=daysLeft(i);return d!==null&&d>0&&d<=3});
   const review=data.filter(i=>i.status==='🔍 รอตรวจ');
-  const stat=(n,l,c)=>`<div class="card !p-3"><div class="text-2xl font-bold ${c}">${n}</div><div class="text-xs text-slate-500 dark:text-slate-400">${l}</div></div>`;
-  $('stats').innerHTML=stat(act.length,'งานค้างทั้งหมด','')+stat(over.length,'เลยกำหนด','text-red-600')+stat(due0.length,'ส่งวันนี้','text-orange-500')+stat(soon.length,'ใน 3 วัน','text-amber-500')+stat(review.length,'รอตรวจ','text-blue-600');
+  const urgentN=act.filter(i=>i.priority==='high'||(daysLeft(i)!==null&&daysLeft(i)<=3)).length;
+  const stat=(n,l,c,t)=>`<button onclick="goList('${t}')" class="card !p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/60 transition"><div class="text-2xl font-bold ${c}">${n}</div><div class="text-xs text-slate-500 dark:text-slate-400">${l}</div></button>`;
+  $('stats').innerHTML=stat(act.length,'งานค้างทั้งหมด','','active')+stat(over.length,'เลยกำหนด','text-red-600','urgent')+stat(due0.length,'ส่งวันนี้','text-orange-500','urgent')+stat(soon.length,'ใน 3 วัน','text-amber-500','urgent')+stat(review.length,'รอตรวจ','text-blue-600','review');
 
-  const tabs=[['active','งานค้าง',act.length],['urgent','ด่วน/ใกล้ส่ง',over.length+due0.length+soon.length+act.filter(i=>i.priority==='high'&&!over.includes(i)&&!due0.includes(i)&&!soon.includes(i)).length],['review','รอตรวจ',review.length],['done','เสร็จแล้ว',data.length-act.length],['all','ทั้งหมด',data.length]];
+  $('viewTabs').innerHTML=[['calendar','📅 ปฏิทิน'],['queue','🗂 คิวงาน'],['list','📋 รายการ']].map(([k,l])=>`<button role="tab" aria-selected="${view===k}" onclick="setView('${k}')" class="flex-1 md:flex-none px-4 py-1.5 rounded-lg transition ${view===k?'bg-white dark:bg-slate-600 shadow-sm font-semibold':'text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700'}">${l}</button>`).join('');
+
+  $('markBar').innerHTML='<span class="text-slate-500 dark:text-slate-400">มาร์ค:</span>'
+    +`<button onclick="setMarkFilter('')" class="px-2.5 py-1 rounded-full border ${!markFilter?'bg-slate-800 text-white border-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:border-slate-100':'border-slate-300 dark:border-slate-600'}">ทั้งหมด</button>`
+    +Object.keys(MARKS).map(k=>{const n=act.filter(i=>i.mark===k).length;const on=markFilter===k;
+      return `<button onclick="setMarkFilter('${k}')" aria-pressed="${on}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${on?'':'border-slate-300 dark:border-slate-600'}" style="--c:${MARKS[k]};${on?'border-color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);font-weight:600':''}"><span class="dot"></span>${esc(mLabel(k))}<span class="opacity-60">${n}</span></button>`}).join('');
+
+  const isList=view==='list';
+  $('sortMode').classList.toggle('hidden',!isList);
+  $('tabs').classList.toggle('hidden',!isList);
+  $('calendarView').classList.toggle('hidden',view!=='calendar');
+  $('list').classList.toggle('hidden',view==='calendar');
+
+  const rows=visible();
+  if(view==='calendar')renderCalendar(rows);
+  else if(view==='queue')renderQueue(rows);
+  else renderList(rows,{act,over,due0,soon,review});
+}
+
+/* ---------- list view ---------- */
+function renderList(rows,s){
+  const kw=$('searchInput').value.trim(),sort=$('sortMode').value;
+  const tabs=[['active','งานค้าง',s.act.length],['urgent','ด่วน/ใกล้ส่ง',s.act.filter(i=>i.priority==='high'||(daysLeft(i)!==null&&daysLeft(i)<=3)).length],['review','รอตรวจ',s.review.length],['done','เสร็จแล้ว',data.length-s.act.length],['all','ทั้งหมด',data.length]];
   $('tabs').innerHTML=tabs.map(([k,l,n])=>`<button onclick="tab='${k}';render()" class="px-3 py-1.5 rounded-full border ${tab===k?'bg-blue-600 text-white border-blue-600':'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600'}">${l} (${n})</button>`).join('');
 
-  let rows=data.filter(i=>{
-    if(kw&&!((i.customer||'')+(i.details||'')+(i.feedback||'')).toLowerCase().includes(kw))return false;
+  rows=rows.filter(i=>{
     const d=daysLeft(i);
     if(tab==='active')return !isDone(i);
     if(tab==='done')return isDone(i);
@@ -218,57 +375,130 @@ function render(){
     if(tab==='urgent')return !isDone(i)&&(i.priority==='high'||(d!==null&&d<=3));
     return true;
   });
-  if(sort==='due')rows.sort((a,b)=>(a.noDate?1:0)-(b.noDate?1:0)||(a.date||'9').localeCompare(b.date||'9'));
+  if(sort==='due')rows.sort(byDue);
   if(sort==='recent')rows.sort((a,b)=>(b.updatedAt||'').localeCompare(a.updatedAt||''));
 
   if(!rows.length){$('list').innerHTML=`<div class="card text-center text-slate-400 py-10">${data.length?'ไม่พบรายการในมุมมองนี้':'ยังไม่มีงาน กด “+ เพิ่มงานใหม่” เพื่อเริ่มต้น'}</div>`;return}
+  const manual=sort==='manual'&&tab==='all'&&!kw&&!markFilter;
+  $('list').innerHTML=rows.map(i=>card(i,{manual})).join('');
+}
 
-  $('list').innerHTML=rows.map(i=>{
-    const d=daysLeft(i);let badge,border='border-slate-200 dark:border-slate-700';
-    if(isDone(i))badge=['อนุมัติ/เสร็จแล้ว','bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'];
-    else if(d===null)badge=['ไม่กำหนดวันส่ง','bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'];
-    else if(d<0){badge=['เลยกำหนด '+(-d)+' วัน','bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 font-bold'];border='border-red-400'}
-    else if(d===0){badge=['ส่งวันนี้'+(i.time?' '+i.time:''),'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300 font-bold'];border='border-orange-400'}
-    else if(d===1)badge=['พรุ่งนี้','bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 font-medium'];
-    else if(d<=3)badge=['อีก '+d+' วัน','bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'];
-    else badge=['อีก '+d+' วัน','bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300'];
-    const manual=sort==='manual'&&tab==='all'&&!kw;
-    return `<article class="fade card !p-3 border ${border} ${isDone(i)?'opacity-75':''}">
-      <div class="flex flex-wrap items-start gap-2">
-        <div class="flex-1 min-w-[200px]">
-          <div class="font-semibold">${i.priority==='high'?'<span class="text-red-600">🔺</span> ':''}${esc(i.customer)}</div>
-          <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">📥 ${esc(i.receiveDate||'-')} → 🏁 ${i.noDate?'ไม่กำหนด':esc(i.date||'-')}${i.time?' ⏰ '+esc(i.time):''}</div>
-        </div>
-        <span class="text-xs px-2 py-1 rounded-full ${badge[1]}">${badge[0]}</span>
-        <select onchange="setStatus('${i.id}',this.value)" class="text-xs border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 rounded-lg p-1.5" aria-label="สถานะ">${STATUSES.map(s=>`<option ${s===i.status?'selected':''}>${s}</option>`).join('')}</select>
+/* ---------- queue view (เรียงตามลำดับที่ต้องส่ง) ---------- */
+function renderQueue(rows){
+  const act=rows.filter(i=>!isDone(i)).sort(byDue);
+  if(!act.length){$('list').innerHTML=`<div class="card text-center text-slate-400 py-10">${data.length?'ไม่มีงานค้างในคิว 🎉':'ยังไม่มีงาน กด “+ เพิ่มงานใหม่” เพื่อเริ่มต้น'}</div>`;return}
+  const groups=[
+    ['เลยกำหนด','text-red-600',d=>d!==null&&d<0],
+    ['ส่งวันนี้','text-orange-500',d=>d===0],
+    ['พรุ่งนี้','text-amber-600',d=>d===1],
+    ['ภายใน 7 วัน','text-blue-600',d=>d!==null&&d>=2&&d<=7],
+    ['หลังจากนั้น','text-slate-600 dark:text-slate-300',d=>d!==null&&d>7],
+    ['ยังไม่กำหนดวันส่ง','text-slate-500',d=>d===null]
+  ];
+  let n=0,html='';
+  groups.forEach(([t,c,f])=>{
+    const g=act.filter(i=>f(daysLeft(i)));
+    if(!g.length)return;
+    html+=`<h2 class="flex items-center gap-2 mt-4 mb-1 font-semibold ${c}">${t}<span class="text-xs font-normal text-slate-400">${g.length} งาน</span></h2>`;
+    html+=g.map(i=>card(i,{num:++n})).join('');
+  });
+  $('list').innerHTML=html;
+}
+
+/* ---------- calendar view ---------- */
+function calNav(n){calM+=n;if(calM<0){calM=11;calY--}if(calM>11){calM=0;calY++}render()}
+function calToday(){const d=new Date();calY=d.getFullYear();calM=d.getMonth();selDate=todayStr();render()}
+function pickDay(ds){
+  selDate=ds;const d=new Date(ds+'T00:00:00');
+  if(d.getMonth()!==calM||d.getFullYear()!==calY){calY=d.getFullYear();calM=d.getMonth()}
+  render();
+  const p=$('dayPanel');if(p)p.scrollIntoView({block:'nearest'});
+}
+function setCalOpt(k,v){if(k==='recv'){showRecv=v;localStorage.ui_recv=v?'1':'0'}else{hideDone=v;localStorage.ui_hide=v?'1':'0'}render()}
+
+function renderCalendar(rows){
+  const y=calY,m=calM,today=todayStr();
+  const lead=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),cells=Math.ceil((lead+dim)/7)*7;
+  const byDate={};
+  rows.forEach(i=>{
+    if(hideDone&&isDone(i))return;
+    const hasD=i.date&&!i.noDate;
+    if(hasD)(byDate[i.date]=byDate[i.date]||[]).push({i,t:'d'});
+    if(showRecv&&i.receiveDate&&i.receiveDate!==i.date)(byDate[i.receiveDate]=byDate[i.receiveDate]||[]).push({i,t:'r'});
+  });
+  Object.values(byDate).forEach(a=>a.sort((p,q)=>(p.t==='r')-(q.t==='r')||byTime(p.i,q.i)));
+
+  const title=new Date(y,m,1).toLocaleDateString('th-TH',{month:'long',year:'numeric'});
+  const prefix=y+'-'+pad(m+1);
+  const mon=rows.filter(i=>i.date&&!i.noDate&&i.date.startsWith(prefix));
+  const monDone=mon.filter(isDone).length,monLate=mon.filter(i=>!isDone(i)&&i.date<today).length;
+  const noDate=rows.filter(i=>!isDone(i)&&(i.noDate||!i.date)).length;
+
+  let grid=WD.map((w,k)=>`<div class="cal-head ${k===0?'text-red-600':''}">${w}</div>`).join('');
+  for(let c=0;c<cells;c++){
+    const dt=new Date(y,m,c-lead+1),ds=fmt(dt.getFullYear(),dt.getMonth(),dt.getDate());
+    const out=dt.getMonth()!==m,list=byDate[ds]||[];
+    const late=list.some(x=>x.t==='d'&&!isDone(x.i)&&ds<today);
+    const chips=list.slice(0,3).map(({i,t})=>`<span class="cchip ${isDone(i)?'done':''} ${t==='d'&&!isDone(i)&&ds<today?'late':''} ${t==='r'?'recv':''}" style="--c:${mColor(i)}">${t==='r'?'📥 ':''}${i.priority==='high'&&t==='d'?'🔺':''}${t==='d'&&i.time?esc(i.time)+' ':''}${esc(i.customer)}</span>`).join('');
+    const more=list.length>3?`<span class="text-[11px] text-slate-500 dark:text-slate-400 px-1">+${list.length-3} อีก</span>`:'';
+    const dots=list.slice(0,6).map(({i,t})=>`<span class="dot" style="--c:${mColor(i)};${isDone(i)?'opacity:.4':''}${t==='r'?';background:transparent;border:1.5px solid '+mColor(i):''}"></span>`).join('');
+    grid+=`<button type="button" onclick="pickDay('${ds}')" class="cal-cell ${out?'out':''} ${ds===selDate?'sel':''}" aria-label="${esc(longDate(ds))} ${list.length?list.length+' งาน':'ไม่มีงาน'}" aria-pressed="${ds===selDate}">
+      <span class="flex items-center justify-between"><span class="cal-num ${ds===today?'today':''} ${dt.getDay()===0&&ds!==today?'sun':''}">${dt.getDate()}</span>${late?'<span class="text-red-600 text-xs" title="มีงานเลยกำหนด">⚠</span>':''}</span>
+      <span class="hidden md:flex flex-col gap-0.5 mt-1 min-w-0">${chips}${more}</span>
+      <span class="md:hidden flex flex-wrap gap-1 mt-1">${dots}</span>
+    </button>`;
+  }
+
+  const sel=byDate[selDate]||[];
+  const panel=sel.length?sel.map(({i,t})=>(t==='r'?'<div class="text-xs text-slate-500 dark:text-slate-400 mt-2 -mb-1">📥 รับงานวันนี้</div>':'')+card(i)).join(''):`<div class="card text-center text-slate-400 py-8">ไม่มีงานในวันนี้</div>`;
+
+  $('calendarView').innerHTML=`
+    <div class="flex flex-wrap items-center gap-2 mb-2">
+      <button class="btn !py-1.5" onclick="calNav(-1)" aria-label="เดือนก่อนหน้า">‹</button>
+      <h2 class="font-semibold text-lg min-w-[9rem] text-center">${esc(title)}</h2>
+      <button class="btn !py-1.5" onclick="calNav(1)" aria-label="เดือนถัดไป">›</button>
+      <button class="btn !py-1.5 text-xs" onclick="calToday()">วันนี้</button>
+      <span class="text-xs text-slate-500 dark:text-slate-400 ml-auto">เดือนนี้ ${mon.length} งาน · เสร็จ ${monDone} · ค้าง ${mon.length-monDone}${monLate?` · <span class="text-red-600 font-medium">เลยกำหนด ${monLate}</span>`:''}</span>
+    </div>
+    <div class="flex flex-wrap gap-4 text-xs mb-2 text-slate-600 dark:text-slate-300">
+      <label class="flex items-center gap-1.5"><input type="checkbox" ${showRecv?'checked':''} onchange="setCalOpt('recv',this.checked)"> แสดงวันรับงาน (กรอบเส้นประ)</label>
+      <label class="flex items-center gap-1.5"><input type="checkbox" ${hideDone?'checked':''} onchange="setCalOpt('done',this.checked)"> ซ่อนงานที่เสร็จแล้ว</label>
+      ${noDate?`<span class="text-slate-500">มี ${noDate} งานที่ยังไม่กำหนดวันส่ง (ดูในแท็บ “คิวงาน”)</span>`:''}
+    </div>
+    <div class="cal-grid rounded-xl overflow-hidden border-t border-l border-slate-200 dark:border-slate-700 shadow-sm" role="grid">${grid}</div>
+    <div id="dayPanel" class="mt-4 space-y-2">
+      <div class="flex flex-wrap items-center gap-2 justify-between">
+        <h3 class="font-semibold">${esc(longDate(selDate))}</h3>
+        <button onclick="openForm('','${selDate}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium">+ เพิ่มงานส่งวันนี้</button>
       </div>
-      ${i.details?`<div class="text-sm mt-2 whitespace-pre-line text-slate-700 dark:text-slate-300">${linkify(i.details)}</div>`:''}
-      ${i.feedback?`<div class="text-xs mt-2 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 text-blue-800 dark:text-blue-200 whitespace-pre-line">💬 ${linkify(i.feedback)}</div>`:''}
-      <div class="flex flex-wrap items-center gap-1.5 mt-3 text-xs">
-        ${isDone(i)?`<button onclick="setStatus('${i.id}','🔥 กำลังทำ')" class="btn !py-1">↩️ เปิดงานอีกครั้ง</button>`:`<button onclick="approve('${i.id}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg">👍 อนุมัติ</button><button onclick="requestFix('${i.id}')" class="btn !py-1">✏️ ขอแก้ไข</button>`}
-        <button onclick="openForm('${i.id}')" class="btn !py-1">แก้ไข</button>
-        <button onclick="dup('${i.id}')" class="btn !py-1">สำเนา</button>
-        <button onclick="del('${i.id}')" class="btn !py-1 text-red-600">ลบ</button>
-        ${manual?`<span class="ml-auto"><button onclick="move('${i.id}',-1)" class="btn !py-1" aria-label="เลื่อนขึ้น">⬆️</button> <button onclick="move('${i.id}',1)" class="btn !py-1" aria-label="เลื่อนลง">⬇️</button></span>`:''}
-      </div></article>`}).join('');
+      ${panel}
+    </div>`;
 }
 
 /* ---------- form ---------- */
 function syncNoDate(){const c=$('noDeliveryDate').checked,d=$('deliveryDate');d.disabled=c;if(c)d.value='';$('deliveryTime').disabled=c}
-function quickDue(n){$('noDeliveryDate').checked=false;syncNoDate();const d=new Date(todayStr()+'T00:00:00');d.setDate(d.getDate()+n);$('deliveryDate').value=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)}
-function openForm(id){
+function quickDue(n){$('noDeliveryDate').checked=false;syncNoDate();const d=new Date(todayStr()+'T00:00:00');d.setDate(d.getDate()+n);$('deliveryDate').value=fmt(d.getFullYear(),d.getMonth(),d.getDate())}
+function pickMark(k){$('markVal').value=k;renderMarkPick()}
+function renderMarkPick(){
+  const cur=$('markVal').value;
+  $('markPick').innerHTML=`<button type="button" class="mpick ${!cur?'on':''}" onclick="pickMark('')">ไม่มี</button>`
+    +Object.keys(MARKS).map(k=>`<button type="button" class="mpick ${cur===k?'on':''}" style="--c:${MARKS[k]}" onclick="pickMark('${k}')" aria-pressed="${cur===k}"><span class="dot"></span>${esc(mLabel(k))}</button>`).join('');
+}
+function openForm(id,presetDate){
   const i=id?data.find(x=>x.id===id):null;
   $('editId').value=id||'';
   $('formTitle').textContent=i?'แก้ไขงาน':'เพิ่มงานใหม่';
   $('customerName').value=i?.customer||'';
   $('receiveDate').value=i?.receiveDate||todayStr();
   $('noDeliveryDate').checked=!!i?.noDate;
-  $('deliveryDate').value=i?.date||'';
+  $('deliveryDate').value=i?.date||(!i&&presetDate)||'';
   $('deliveryTime').value=i?.time||'';
   $('deliveryStatus').value=i?.status||STATUSES[1];
   $('priority').value=i?.priority||'normal';
   $('deliveryDetails').value=i?.details||'';
   $('reviewerFeedback').value=i?.feedback||'';
+  $('markVal').value=i?.mark||markFilter||'';
+  renderMarkPick();
   syncNoDate();
   $('formModal').classList.remove('hidden');
   setTimeout(()=>$('customerName').focus(),50);
@@ -277,7 +507,7 @@ function closeForm(){$('formModal').classList.add('hidden')}
 
 async function saveItem(){
   const noDate=$('noDeliveryDate').checked;
-  const item={customer:$('customerName').value.trim(),receiveDate:$('receiveDate').value,noDate,date:noDate?'':$('deliveryDate').value,time:noDate?'':$('deliveryTime').value,status:$('deliveryStatus').value,priority:$('priority').value,details:$('deliveryDetails').value.trim(),feedback:$('reviewerFeedback').value.trim()};
+  const item={customer:$('customerName').value.trim(),receiveDate:$('receiveDate').value,noDate,date:noDate?'':$('deliveryDate').value,time:noDate?'':$('deliveryTime').value,status:$('deliveryStatus').value,priority:$('priority').value,mark:$('markVal').value,details:$('deliveryDetails').value.trim(),feedback:$('reviewerFeedback').value.trim()};
   if(!item.customer||!item.receiveDate)return toast('กรอกชื่อลูกค้าและวันรับงาน','err');
   if(!noDate&&!item.date)return toast('เลือกวันส่ง หรือติ๊ก “ไม่กำหนด”','err');
   const id=$('editId').value;const now=new Date().toISOString();
@@ -286,7 +516,8 @@ async function saveItem(){
     if(id){const k=data.findIndex(x=>x.id===id);if(k<0)throw new Error('งานนี้ถูกลบไปแล้ว');const wasDone=isDone(data[k]);data[k]={...data[k],...item,updatedAt:now};if(isDone(item)&&!wasDone)data[k].approvedAt=now}
     else data.unshift({id:uid(),...item,updatedAt:now,approvedAt:isDone(item)?now:''});
   },id?'อัปเดตแล้ว':'เพิ่มงานแล้ว');
-  $('saveBtn').disabled=false;if(ok)closeForm();
+  $('saveBtn').disabled=false;
+  if(ok){closeForm();if(item.date&&view==='calendar')pickDay(item.date)}
 }
 
 /* ---------- actions ---------- */
@@ -295,22 +526,48 @@ const stamp=()=>new Date().toLocaleDateString('th-TH',{day:'numeric',month:'shor
 const approve=id=>withItem(id,i=>{i.status='👍 Approved';i.approvedAt=new Date().toISOString();i.feedback=(i.feedback?i.feedback+'\n':'')+'✔ อนุมัติแล้ว '+stamp()},'อนุมัติแล้ว');
 function requestFix(id){const t=prompt('ระบุสิ่งที่ต้องแก้ไข:');if(t&&t.trim())withItem(id,i=>{i.status='🔥 กำลังทำ';i.feedback=(i.feedback?i.feedback+'\n':'')+'✏️ ขอแก้ ('+stamp()+'): '+t.trim()},'ส่งกลับให้แก้ไขแล้ว')}
 const setStatus=(id,s)=>withItem(id,i=>{i.status=s;if(DONE.includes(s))i.approvedAt=new Date().toISOString()},'เปลี่ยนสถานะแล้ว');
+const setMark=(id,k)=>withItem(id,i=>{i.mark=i.mark===k?'':k},'ตั้งมาร์คแล้ว');
 function del(id){const i=data.find(x=>x.id===id);if(i&&confirm('ลบ “'+i.customer+'” ใช่หรือไม่?'))mutate(()=>{data=data.filter(x=>x.id!==id)},'ลบแล้ว')}
 const dup=id=>mutate(()=>{const k=data.findIndex(x=>x.id===id);if(k<0)return;const c={...data[k],id:uid(),customer:data[k].customer+' (สำเนา)',status:STATUSES[0],feedback:'',approvedAt:'',updatedAt:new Date().toISOString()};data.splice(k,0,c)},'สร้างสำเนาแล้ว');
 const move=(id,dir)=>mutate(()=>{const k=data.findIndex(x=>x.id===id),n=k+dir;if(k<0||n<0||n>=data.length)return;[data[k],data[n]]=[data[n],data[k]]});
 
 /* ---------- export / share ---------- */
+function download(name,type,content){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+
 function copySummary(){
-  const act=data.filter(i=>!isDone(i)).sort((a,b)=>(a.noDate?1:0)-(b.noDate?1:0)||(a.date||'9').localeCompare(b.date||'9'));
+  const act=data.filter(i=>!isDone(i)).sort(byDue);
   if(!act.length)return toast('ไม่มีงานค้าง');
-  const txt='📋 สรุปคิวงาน '+new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'})+'\n\n'+act.map((i,n)=>{const d=daysLeft(i);const w=d===null?'ไม่กำหนด':d<0?'เลย '+(-d)+' วัน':d===0?'วันนี้':i.date;return (n+1)+'. '+(i.priority==='high'?'🔺':'')+i.customer+' — '+w+(i.time?' '+i.time:'')+' ['+i.status+']'}).join('\n');
+  const txt='📋 สรุปคิวงาน '+new Date().toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'})+'\n\n'+act.map((i,n)=>{const d=daysLeft(i);const w=d===null?'ไม่กำหนด':d<0?'เลย '+(-d)+' วัน':d===0?'วันนี้':d===1?'พรุ่งนี้':i.date;return (n+1)+'. '+(i.priority==='high'?'🔺':'')+i.customer+' — '+w+(i.time?' '+i.time:'')+' ['+i.status+']'}).join('\n');
   (navigator.clipboard?.writeText(txt)||Promise.reject()).then(()=>toast('คัดลอกสรุปแล้ว วางในไลน์ได้เลย')).catch(()=>prompt('คัดลอกข้อความนี้:',txt));
 }
 function exportCSV(){
-  const cols=[['customer','ลูกค้า'],['receiveDate','วันรับงาน'],['date','วันส่ง'],['time','เวลา'],['status','สถานะ'],['priority','ความสำคัญ'],['details','รายละเอียด'],['feedback','ความเห็นผู้ตรวจ']];
+  const cols=[['customer','ลูกค้า'],['receiveDate','วันรับงาน'],['date','วันส่ง'],['time','เวลา'],['status','สถานะ'],['priority','ความสำคัญ'],['mark','มาร์ค'],['details','รายละเอียด'],['feedback','ความเห็นผู้ตรวจ']];
   const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
-  const csv='\uFEFF'+cols.map(c=>q(c[1])).join(',')+'\n'+data.map(i=>cols.map(c=>q(i[c[0]])).join(',')).join('\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='schedule-'+todayStr()+'.csv';a.click();
+  const val=(i,k)=>k==='mark'?(hasMark(i)?mLabel(i.mark):''):i[k];
+  const csv='\uFEFF'+cols.map(c=>q(c[1])).join(',')+'\n'+data.map(i=>cols.map(c=>q(val(i,c[0]))).join(',')).join('\n');
+  download('schedule-'+todayStr()+'.csv','text/csv;charset=utf-8',csv);
+}
+function exportICS(){
+  const act=data.filter(i=>!isDone(i)&&i.date&&!i.noDate);
+  if(!act.length)return toast('ไม่มีงานค้างที่กำหนดวันส่งให้ส่งออก','err');
+  const t=s=>String(s??'').replace(/\\/g,'\\\\').replace(/\r?\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;');
+  const compact=d=>d.replace(/-/g,'');
+  const now=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Schedule App//TH','CALSCALE:GREGORIAN','X-WR-CALNAME:คิวส่งงาน'];
+  act.forEach(i=>{
+    L.push('BEGIN:VEVENT','UID:'+i.id+'@schedule-app','DTSTAMP:'+now);
+    if(i.time){
+      const e=new Date(i.date+'T'+i.time+':00');e.setHours(e.getHours()+1);
+      L.push('DTSTART:'+compact(i.date)+'T'+i.time.replace(':','')+'00','DTEND:'+e.getFullYear()+pad(e.getMonth()+1)+pad(e.getDate())+'T'+pad(e.getHours())+pad(e.getMinutes())+'00');
+    }else{
+      const n=new Date(i.date+'T00:00:00');n.setDate(n.getDate()+1);
+      L.push('DTSTART;VALUE=DATE:'+compact(i.date),'DTEND;VALUE=DATE:'+n.getFullYear()+pad(n.getMonth()+1)+pad(n.getDate()));
+    }
+    L.push('SUMMARY:'+t((i.priority==='high'?'🔺 ':'')+i.customer),'DESCRIPTION:'+t((i.details||'')+(hasMark(i)?'\nมาร์ค: '+mLabel(i.mark):'')+'\nสถานะ: '+i.status),'END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  download('schedule-'+todayStr()+'.ics','text/calendar;charset=utf-8',L.join('\r\n'));
+  toast('ส่งออก '+act.length+' งานแล้ว นำเข้า Google Calendar ได้เลย');
 }
 </script>
 </body>

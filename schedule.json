@@ -17,23 +17,6 @@
     "approvedAt": ""
   },
   {
-    "id": "mw1k7vmoppli",
-    "customer": "ถ่ายภาพ นร. ม.6",
-    "receiveDate": "2026-11-04",
-    "noDate": false,
-    "date": "2026-11-28",
-    "time": "",
-    "status": "⏳ รอดำเนินการ",
-    "priority": "normal",
-    "mark": "green",
-    "workStart": "2026-11-25",
-    "workEnd": "2026-11-26",
-    "details": "วันที่ 25/11\n09.30-10.15 - M.6/1 [31]\n10.15-11.05 - M.6/2 [28]\n\nวันที่ 26/11\n09.30-10.15 - M.6/3 [19]\n10.15-11.05 - M.6/4 [30]",
-    "feedback": "",
-    "updatedAt": "2026-11-04T03:31:20.708Z",
-    "approvedAt": ""
-  },
-  {
     "id": "mw049jybzpkd",
     "customer": "ออกบูธ โลบินสันถลาง",
     "receiveDate": "2026-11-03",

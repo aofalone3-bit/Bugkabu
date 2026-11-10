@@ -334,12 +334,13 @@
     "date": "",
     "noDate": true,
     "time": "15:37",
-    "status": "🔥 กำลังทำ",
+    "status": "⏳ รอดำเนินการ",
     "details": "ของาน ดราฟ 2-3 แบบ",
     "feedback": "",
     "id": "mukp518e43n4",
     "priority": "normal",
-    "mark": ""
+    "mark": "",
+    "updatedAt": "2026-11-10T01:51:59.721Z"
   },
   {
     "customer": "AW ป้ายห้ามจอด",

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ระบบจัดการคิวส่งงาน v4.1</title>
+<title>ระบบจัดการคิวส่งงาน v5.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -75,6 +75,24 @@
   .dark .cal-num.hol:not(.today){background:#4c1d24;color:#fca5a5}
   .cal-cell.hol:not(.sel):not(.out){background:#fef2f2}
   .dark .cal-cell.hol:not(.sel):not(.out){background:#2a1c24}
+
+  .ios-group{background:#f1f5f9;border-radius:12px;overflow:hidden}.dark .ios-group{background:#0f172a}
+  .ios-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 14px;min-height:46px;border-bottom:1px solid #e2e8f0;font-size:15px}
+  .dark .ios-row{border-color:#1e293b}.ios-row:last-child{border-bottom:0}
+  .ios-pill{background:#e2e8f0;border:0;border-radius:8px;padding:6px 12px;font-size:15px;color:inherit;cursor:pointer}
+  .dark .ios-pill{background:#334155}.ios-pill.act{background:#dbeafe;color:#2563eb}.dark .ios-pill.act{background:#1e3a5f;color:#93c5fd}
+  .sw{appearance:none;-webkit-appearance:none;width:46px;height:28px;border-radius:99px;background:#cbd5e1;position:relative;cursor:pointer;transition:.2s;flex:none;border:0}
+  .sw::after{content:'';position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:99px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:.2s}
+  .sw:checked{background:#34c759}.sw:checked::after{transform:translateX(18px)}
+  .dp{padding:6px 12px 12px;border-bottom:1px solid #e2e8f0;background:#fff}.dark .dp{background:#1e293b;border-color:#1e293b}
+  .dp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+  .dp-d{height:38px;border-radius:99px;border:0;background:transparent;color:inherit;font-size:15px;cursor:pointer}
+  .dp-d.out{opacity:.35}.dp-d.today{color:#2563eb;font-weight:700}.dp-d.sun{color:#dc2626}.dp-d.sel{background:#2563eb;color:#fff}
+  .ipill{background:#e2e8f0;border-radius:8px;padding:2px 8px}.dark .ipill{background:#334155}
+  .ipill.warn{background:#fef3c7;color:#92400e}.dark .ipill.warn{background:#78350f;color:#fde68a}
+  .rem{background:#fef3c7;border:1px solid #f59e0b;color:#78350f;border-radius:12px;padding:10px 14px;margin-bottom:12px}
+  .dark .rem{background:#422006;border-color:#b45309;color:#fde68a}
+  .rem .chip{background:rgba(255,255,255,.7);color:#78350f}.dark .rem .chip{background:rgba(0,0,0,.3);color:#fde68a}
 </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors">
@@ -83,7 +101,7 @@
   <!-- Header -->
   <header class="flex flex-wrap items-center justify-between gap-3 mb-4">
     <div>
-      <h1 class="text-xl md:text-2xl font-bold">📋 คิวส่งงาน & ตรวจงาน <span class="text-xs font-semibold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full align-middle">v4.1</span></h1>
+      <h1 class="text-xl md:text-2xl font-bold">📋 คิวส่งงาน & ตรวจงาน <span class="text-xs font-semibold bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full align-middle">v5.0</span></h1>
       <p id="syncStatus" class="text-xs text-slate-500 dark:text-slate-400 mt-1">ยังไม่ได้เชื่อมต่อ</p>
     </div>
     <div class="flex flex-wrap gap-2 text-xs">
@@ -115,14 +133,21 @@
       <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">เช่น แดง = งานด่วนลูกค้า A, เขียว = งานโซเชียล (เก็บในเครื่องนี้)</p>
       <div id="markLabelInputs" class="grid grid-cols-2 md:grid-cols-7 gap-2"></div>
     </div>
+    <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700">
+      <h3 class="font-semibold text-sm mb-1">✨ AI ช่วยจัดการงาน (Google Gemini)</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">ขอ API Key ฟรีที่ aistudio.google.com · เก็บในเบราว์เซอร์เครื่องนี้เท่านั้น ข้อความที่พิมพ์จะถูกส่งไปยัง Google เพื่อวิเคราะห์</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2"><input id="aiKey" type="password" placeholder="Gemini API Key" class="inp" oninput="saveAI()"><input id="aiModel" placeholder="โมเดล (เว้นว่าง = gemini-2.5-flash)" class="inp" oninput="saveAI()"></div>
+    </div>
   </section>
 
   <!-- Stats -->
-  <section id="stats" class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-4"></section>
+  <section id="stats" class="grid grid-cols-2 md:grid-cols-6 gap-2 mb-4"></section>
+  <section id="nodateBar"></section>
 
   <!-- Toolbar -->
   <div class="flex flex-col md:flex-row gap-2 mb-3">
     <button onclick="openForm()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm">+ เพิ่มงานใหม่</button>
+    <button onclick="toggle('aiPanel')" class="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm">✨ AI ช่วยเพิ่มงาน</button>
     <input id="searchInput" oninput="render()" placeholder="🔍 ค้นหาชื่อลูกค้า / รายละเอียด  (กด / เพื่อค้นหา)" class="inp flex-1">
     <select id="sortMode" onchange="render()" class="inp md:w-52" aria-label="เรียงลำดับ">
       <option value="manual">เรียงตามที่จัดเอง</option>
@@ -131,6 +156,16 @@
     </select>
   </div>
 
+  <section id="aiPanel" class="hidden card mb-3 !border-violet-300 dark:!border-violet-700">
+    <h2 class="font-semibold text-sm">✨ AI ช่วยเพิ่มงานจากข้อความ</h2>
+    <p class="text-xs text-slate-500 dark:text-slate-400 mb-2">พิมพ์ได้แบบธรรมชาติ หลายงานในข้อความเดียวก็ได้ AI จะแยกวันรับ/วันส่ง/เวลา/ความด่วนให้</p>
+    <textarea id="aiText" rows="3" class="inp" placeholder="เช่น บันทึก ชุดจั๊มสูทคุณแอน ไซส์ M ปักชื่อ ต้องส่งก่อนวันที่ 5 ธ.ค. 10 โมง ด่วน"></textarea>
+    <div class="flex flex-wrap items-center gap-3 mt-2">
+      <button id="aiBtn" onclick="aiRun()" class="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-medium">✨ วิเคราะห์และเพิ่มลงปฏิทิน</button>
+      <label class="text-xs flex items-center gap-1.5"><input type="checkbox" id="aiAuto" onchange="localStorage.ai_auto=this.checked?'1':'0'"> เพิ่มอัตโนมัติ (ไม่ต้องยืนยัน ยกเว้นวันที่ผ่านมาแล้ว)</label>
+    </div>
+    <div id="aiResult"></div>
+  </section>
   <div id="viewTabs" class="flex gap-1 p-1 rounded-xl bg-slate-200/70 dark:bg-slate-800 mb-3 text-sm w-full md:w-fit" role="tablist"></div>
   <div id="markBar" class="flex flex-wrap items-center gap-1.5 mb-3 text-xs"></div>
   <div id="tabs" class="flex flex-wrap gap-1.5 mb-4 text-xs"></div>
@@ -139,7 +174,7 @@
   <section id="calendarView" class="hidden"></section>
   <main id="list" class="space-y-2"></main>
 
-  <footer class="text-center text-xs text-slate-400 mt-8">ระบบคิวส่งงาน v4.1 · ซิงค์อัตโนมัติทุก 60 วินาที · ทางลัด: N = งานใหม่, / = ค้นหา</footer>
+  <footer class="text-center text-xs text-slate-400 mt-8">ระบบคิวส่งงาน v5.0 · ซิงค์อัตโนมัติทุก 60 วินาที · ทางลัด: N = งานใหม่, / = ค้นหา</footer>
 </div>
 
 <!-- Form modal -->
@@ -150,38 +185,7 @@
     <input type="hidden" id="markVal">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <label class="lbl md:col-span-2">ชื่อลูกค้า / ชิ้นงาน *<input id="customerName" class="inp mt-1" placeholder="เช่น คุณสมชาย – โปสเตอร์ A3"></label>
-      <label class="lbl">วันรับงาน *<input type="date" id="receiveDate" class="inp mt-1"></label>
-      <div class="lbl">วันส่งงาน
-        <div class="flex gap-2 mt-1 items-center">
-          <input type="date" id="deliveryDate" class="inp flex-1" onchange="updateDateHint();updateMultiHint()">
-          <label class="flex items-center gap-1 whitespace-nowrap"><input type="checkbox" id="noDeliveryDate" onchange="syncNoDate()"> ไม่กำหนด</label>
-        </div>
-        <div class="flex gap-1 mt-1.5">
-          <button type="button" class="chip" onclick="quickDue(0)">วันนี้</button>
-          <button type="button" class="chip" onclick="quickDue(1)">พรุ่งนี้</button>
-          <button type="button" class="chip" onclick="quickDue(3)">+3 วัน</button>
-          <button type="button" class="chip" onclick="quickDue(7)">+7 วัน</button>
-        </div>
-        <p id="dateHint" class="hidden text-xs font-normal text-amber-700 dark:text-amber-300 mt-1.5"></p>
-      </div>
-      <div class="lbl md:col-span-2 rounded-lg border border-slate-200 dark:border-slate-700 p-3">
-        <label class="flex items-center gap-2 font-medium text-slate-700 dark:text-slate-200"><input type="checkbox" id="multiDay" onchange="syncMulti()"> 🛠 ทำงานหลายวัน (กำหนดช่วงเวลาทำงาน เช่น วันที่ 1–5)</label>
-        <div id="multiBox" class="hidden mt-2">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <label class="lbl">เริ่มทำงาน<input type="date" id="workStart" class="inp mt-1" onchange="updateMultiHint()"></label>
-            <label class="lbl">ทำงานถึงวันที่<input type="date" id="workEnd" class="inp mt-1" onchange="updateMultiHint()"></label>
-          </div>
-          <div class="flex flex-wrap gap-1 mt-1.5">
-            <button type="button" class="chip" onclick="setSpan(2)">2 วัน</button>
-            <button type="button" class="chip" onclick="setSpan(3)">3 วัน</button>
-            <button type="button" class="chip" onclick="setSpan(5)">5 วัน</button>
-            <button type="button" class="chip" onclick="setSpan(7)">7 วัน</button>
-            <button type="button" class="chip" onclick="endAtDelivery()">สิ้นสุดวันส่งงาน</button>
-          </div>
-          <p id="multiHint" class="hidden text-xs font-normal mt-1.5"></p>
-        </div>
-      </div>
-      <label class="lbl">เวลาส่ง<input type="time" id="deliveryTime" class="inp mt-1"></label>
+      <div id="dateGroup" class="md:col-span-2"></div>
       <label class="lbl">สถานะ
         <select id="deliveryStatus" class="inp mt-1"></select>
       </label>
@@ -288,14 +292,6 @@ function delCustomDay(id){
   const c=customDays.find(x=>x.id===id);
   if(c&&confirm('ลบวันสำคัญ “'+c.name+'” ใช่หรือไม่?')){customDays=customDays.filter(x=>x.id!==id);saveCustom();render()}
 }
-function updateDateHint(){
-  const ds=$('noDeliveryDate').checked?'':$('deliveryDate').value,el=$('dateHint');
-  const parts=[];
-  if(ds){const h=holName(ds);if(h)parts.push('🎌 '+h+' (วันหยุด)');const wd=new Date(ds+'T00:00:00').getDay();if(wd===0||wd===6)parts.push(wd===0?'ตรงกับวันอาทิตย์':'ตรงกับวันเสาร์')}
-  el.textContent=parts.length?'⚠ วันส่งนี้ '+parts.join(' · '):'';
-  el.classList.toggle('hidden',!parts.length);
-}
-
 /* ---------- ui state ---------- */
 let view=localStorage.ui_view||'calendar';
 if(!['calendar','queue','list'].includes(view))view='calendar';
@@ -307,6 +303,7 @@ window.onload=()=>{
   if(localStorage.theme==='dark'||(!localStorage.theme&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark');
   themeIcon();
   $('deliveryStatus').innerHTML=STATUSES.map(s=>`<option>${s}</option>`).join('');
+  $('aiKey').value=localStorage.ai_key||'';$('aiModel').value=localStorage.ai_model||'';$('aiAuto').checked=localStorage.ai_auto==='1';
   ['owner','repo','path','token'].forEach(k=>{const v=localStorage['gh_'+k];if(v)$({owner:'repoOwner',repo:'repoName',path:'filePath',token:'githubToken'}[k]).value=v});
   $('markLabelInputs').innerHTML=Object.keys(MARKS).map(k=>`<label class="flex items-center gap-1.5" style="--c:${MARKS[k]}"><span class="dot"></span><input class="inp !p-1.5" value="${esc(mLabel(k))}" maxlength="20" oninput="setMarkLabel('${k}',this.value)" aria-label="ชื่อมาร์ค ${esc(MARK_DEF[k])}"></label>`).join('');
   try{data=JSON.parse(localStorage.cache_data||'[]')}catch{data=[]}
@@ -354,7 +351,7 @@ async function fetchRemote(){
 }
 async function putRemote(){
   const c=cfg();
-  const body={message:'Update schedule via web app v4.1',content:b64enc(JSON.stringify(data,null,2))};
+  const body={message:'Update schedule via web app v5.0',content:b64enc(JSON.stringify(data,null,2))};
   if(sha)body.sha=sha;
   const r=await fetch(apiUrl(c),{method:'PUT',headers:{...hdr(c),'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||'HTTP '+r.status)}
@@ -381,13 +378,14 @@ function visible(){
   const kw=$('searchInput').value.trim().toLowerCase();
   return data.filter(i=>(!markFilter||i.mark===markFilter)&&(!kw||((i.customer||'')+(i.details||'')+(i.feedback||'')).toLowerCase().includes(kw)));
 }
+const ageDays=i=>i.receiveDate?Math.max(0,Math.round((new Date(todayStr()+'T00:00:00')-new Date(i.receiveDate+'T00:00:00'))/864e5)):0;
 const byTime=(a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99');
 const byDue=(a,b)=>(a.noDate?1:0)-(b.noDate?1:0)||(a.date||'9').localeCompare(b.date||'9')||byTime(a,b)||((b.priority==='high')-(a.priority==='high'));
 
 function badgeOf(i){
   const d=daysLeft(i);
   if(isDone(i))return ['อนุมัติ/เสร็จแล้ว','bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',''];
-  if(d===null)return ['ไม่กำหนดวันส่ง','bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',''];
+  if(d===null)return ['ยังไม่กำหนดวันส่ง'+(ageDays(i)>0?' · ค้าง '+ageDays(i)+' วัน':''),'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 font-medium','border-amber-400'];
   if(d<0)return ['เลยกำหนด '+(-d)+' วัน','bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 font-bold','border-red-400'];
   if(d===0)return ['ส่งวันนี้'+(i.time?' '+i.time:''),'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300 font-bold','border-orange-400'];
   if(d===1)return ['พรุ่งนี้'+(i.time?' '+i.time:''),'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 font-medium',''];
@@ -405,7 +403,7 @@ function card(i,o={}){
       ${o.num?`<span class="qnum" title="คิวที่ ${o.num}">${o.num}</span>`:''}
       <div class="flex-1 min-w-[200px]">
         <div class="font-semibold">${i.priority==='high'?'<span class="text-red-600">🔺</span> ':''}${esc(i.customer)}${hasMark(i)?` <span class="mtag" style="--c:${mColor(i)}">${esc(mLabel(i.mark))}</span>`:''}</div>
-        <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">📥 ${esc(i.receiveDate||'-')} → 🏁 ${i.noDate?'ไม่กำหนด':esc(i.date||'-')}${i.time?' ⏰ '+esc(i.time):''}${!isDone(i)&&!i.noDate&&holName(i.date)?` <span class="text-red-600 dark:text-red-400">🎌 ${esc(holName(i.date))}</span>`:''}</div>${hasRange(i)?`<div class="text-xs text-indigo-600 dark:text-indigo-300 mt-0.5">🛠 ช่วงทำงาน ${esc(rangeText(i))}</div>`:''}
+        <div class="flex flex-wrap items-center gap-1.5 mt-1 text-xs"><span class="ipill">📥 ${esc(fLbl(i.receiveDate,1))}</span>→${i.noDate||!i.date?'<span class="ipill warn">⏳ ไม่กำหนดวันส่ง</span>':`<span class="ipill">🏁 ${esc(fLbl(i.date,1))}${i.time?' · '+esc(i.time)+' น.':''}</span>`}${!isDone(i)&&!i.noDate&&holName(i.date)?` <span class="text-red-600 dark:text-red-400">🎌 ${esc(holName(i.date))}</span>`:''}</div>${hasRange(i)?`<div class="text-xs text-indigo-600 dark:text-indigo-300 mt-0.5">🛠 ช่วงทำงาน ${esc(rangeText(i))}</div>`:''}
       </div>
       <span class="text-xs px-2 py-1 rounded-full ${bc}">${bt}</span>
       <select onchange="setStatus('${i.id}',this.value)" class="text-xs border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 rounded-lg p-1.5" aria-label="สถานะ">${STATUSES.map(s=>`<option ${s===i.status?'selected':''}>${s}</option>`).join('')}</select>
@@ -414,7 +412,7 @@ function card(i,o={}){
     ${i.feedback?`<div class="text-xs mt-2 p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 text-blue-800 dark:text-blue-200 whitespace-pre-line">💬 ${linkify(i.feedback)}</div>`:''}
     <div class="flex flex-wrap items-center gap-1.5 mt-3 text-xs">
       ${isDone(i)?`<button onclick="setStatus('${i.id}','🔥 กำลังทำ')" class="btn !py-1">↩️ เปิดงานอีกครั้ง</button>`:`<button onclick="approve('${i.id}')" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg">👍 อนุมัติ</button><button onclick="requestFix('${i.id}')" class="btn !py-1">✏️ ขอแก้ไข</button>`}
-      <button onclick="openForm('${i.id}')" class="btn !py-1">แก้ไข</button>
+      ${!isDone(i)&&daysLeft(i)===null?`<button onclick="openForm('${i.id}','',null,'due')" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg">📅 กำหนดวันส่ง</button>`:''}<button onclick="openForm('${i.id}')" class="btn !py-1">แก้ไข</button>
       <button onclick="dup('${i.id}')" class="btn !py-1">สำเนา</button>
       <button onclick="del('${i.id}')" class="btn !py-1 text-red-600">ลบ</button>
       <span class="ml-auto inline-flex items-center gap-3">${markDots(i)}${o.manual?`<span><button onclick="move('${i.id}',-1)" class="btn !py-1" aria-label="เลื่อนขึ้น">⬆️</button> <button onclick="move('${i.id}',1)" class="btn !py-1" aria-label="เลื่อนลง">⬇️</button></span>`:''}</span>
@@ -432,9 +430,12 @@ function render(){
   const due0=act.filter(i=>daysLeft(i)===0);
   const soon=act.filter(i=>{const d=daysLeft(i);return d!==null&&d>0&&d<=3});
   const review=data.filter(i=>i.status==='🔍 รอตรวจ');
+  const nod=act.filter(i=>daysLeft(i)===null).sort((a,b)=>(a.receiveDate||'').localeCompare(b.receiveDate||''));
   const urgentN=act.filter(i=>i.priority==='high'||(daysLeft(i)!==null&&daysLeft(i)<=3)).length;
   const stat=(n,l,c,t)=>`<button onclick="goList('${t}')" class="card !p-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/60 transition"><div class="text-2xl font-bold ${c}">${n}</div><div class="text-xs text-slate-500 dark:text-slate-400">${l}</div></button>`;
-  $('stats').innerHTML=stat(act.length,'งานค้างทั้งหมด','','active')+stat(over.length,'เลยกำหนด','text-red-600','urgent')+stat(due0.length,'ส่งวันนี้','text-orange-500','urgent')+stat(soon.length,'ใน 3 วัน','text-amber-500','urgent')+stat(review.length,'รอตรวจ','text-blue-600','review');
+  $('stats').innerHTML=stat(act.length,'งานค้างทั้งหมด','','active')+stat(over.length,'เลยกำหนด','text-red-600','urgent')+stat(due0.length,'ส่งวันนี้','text-orange-500','urgent')+stat(soon.length,'ใน 3 วัน','text-amber-500','urgent')+stat(nod.length,'ไม่กำหนดวัน','text-amber-600','nodate')+stat(review.length,'รอตรวจ','text-blue-600','review');
+  $('nodateBar').innerHTML=nod.length?`<div class="rem" role="alert"><div class="font-semibold">⚠️ มี ${nod.length} งานที่ยังไม่กำหนดวันส่ง — อย่าลืมกำหนดวัน</div><div class="flex flex-wrap gap-1.5 mt-2">${nod.slice(0,6).map(i=>`<button class="chip" onclick="openForm('${i.id}','',null,'due')">${esc(i.customer.slice(0,24))} · ค้าง ${ageDays(i)} วัน</button>`).join('')}${nod.length>6?`<span class="text-xs self-center">+${nod.length-6}</span>`:''}<button class="btn !py-1 text-xs" onclick="goList('nodate')">ดูทั้งหมด</button></div></div>`:'';
+  const alertN=over.length+due0.length+nod.length;document.title=(alertN?'('+alertN+') ':'')+'ระบบจัดการคิวส่งงาน v5.0';
 
   $('viewTabs').innerHTML=[['calendar','📅 ปฏิทิน'],['queue','🗂 คิวงาน'],['list','📋 รายการ']].map(([k,l])=>`<button role="tab" aria-selected="${view===k}" onclick="setView('${k}')" class="flex-1 md:flex-none px-4 py-1.5 rounded-lg transition ${view===k?'bg-white dark:bg-slate-600 shadow-sm font-semibold':'text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700'}">${l}</button>`).join('');
 
@@ -458,13 +459,14 @@ function render(){
 /* ---------- list view ---------- */
 function renderList(rows,s){
   const kw=$('searchInput').value.trim(),sort=$('sortMode').value;
-  const tabs=[['active','งานค้าง',s.act.length],['urgent','ด่วน/ใกล้ส่ง',s.act.filter(i=>i.priority==='high'||(daysLeft(i)!==null&&daysLeft(i)<=3)).length],['review','รอตรวจ',s.review.length],['done','เสร็จแล้ว',data.length-s.act.length],['all','ทั้งหมด',data.length]];
+  const tabs=[['active','งานค้าง',s.act.length],['nodate','ไม่กำหนดวัน',s.act.filter(i=>daysLeft(i)===null).length],['urgent','ด่วน/ใกล้ส่ง',s.act.filter(i=>i.priority==='high'||(daysLeft(i)!==null&&daysLeft(i)<=3)).length],['review','รอตรวจ',s.review.length],['done','เสร็จแล้ว',data.length-s.act.length],['all','ทั้งหมด',data.length]];
   $('tabs').innerHTML=tabs.map(([k,l,n])=>`<button onclick="tab='${k}';render()" class="px-3 py-1.5 rounded-full border ${tab===k?'bg-blue-600 text-white border-blue-600':'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600'}">${l} (${n})</button>`).join('');
 
   rows=rows.filter(i=>{
     const d=daysLeft(i);
     if(tab==='active')return !isDone(i);
     if(tab==='done')return isDone(i);
+    if(tab==='nodate')return !isDone(i)&&d===null;
     if(tab==='review')return i.status==='🔍 รอตรวจ';
     if(tab==='urgent')return !isDone(i)&&(i.priority==='high'||(d!==null&&d<=3));
     return true;
@@ -574,7 +576,7 @@ function renderCalendar(rows){
       <label class="flex items-center gap-1.5"><input type="checkbox" ${hideDone?'checked':''} onchange="setCalOpt('done',this.checked)"> ซ่อนงานที่เสร็จแล้ว</label>
       <label class="flex items-center gap-1.5"><input type="checkbox" ${showHol?'checked':''} onchange="setCalOpt('hol',this.checked)"> <span class="dlab h !inline-block">🎌 วันหยุด</span></label>
       <label class="flex items-center gap-1.5"><input type="checkbox" ${showSpc?'checked':''} onchange="setCalOpt('spc',this.checked)"> <span class="dlab s !inline-block">✨ วันสำคัญ/แคมเปญ</span></label>
-      ${noDate?`<span class="text-slate-500">มี ${noDate} งานที่ยังไม่กำหนดวันส่ง (ดูในแท็บ “คิวงาน”)</span>`:''}
+      
     </div>
     <div class="cal-grid rounded-xl overflow-hidden border-t border-l border-slate-200 dark:border-slate-700 shadow-sm" role="grid">${grid}</div>
     <div id="dayPanel" class="mt-4 space-y-2">
@@ -590,81 +592,83 @@ function renderCalendar(rows){
     </div>`;
 }
 
-/* ---------- form ---------- */
-function syncNoDate(){const c=$('noDeliveryDate').checked,d=$('deliveryDate');d.disabled=c;if(c)d.value='';$('deliveryTime').disabled=c;updateDateHint();updateMultiHint()}
-/* ---- ช่วงทำงานหลายวัน ---- */
-function applyMulti(){$('multiBox').classList.toggle('hidden',!$('multiDay').checked)}
-function syncMulti(){
-  applyMulti();
-  if($('multiDay').checked){
-    if(!$('workStart').value)$('workStart').value=$('receiveDate').value||todayStr();
-    if(!$('workEnd').value){const dd=$('noDeliveryDate').checked?'':$('deliveryDate').value,st=$('workStart').value;$('workEnd').value=(dd&&dd>=st)?dd:st}
-  }
-  updateMultiHint();
+/* ---------- form (ดีไซน์แบบ iPhone) ---------- */
+const F={recv:'',due:'',time:'',hasTime:0,noDate:0,multi:0,ws:'',we:'',open:'',py:0,pm:0};
+const fLbl=(ds,short)=>ds?new Date(ds+'T00:00:00').toLocaleDateString('th-TH',short?{weekday:'short',day:'numeric',month:'short'}:{weekday:'short',day:'numeric',month:'short',year:'numeric'}):'เลือกวัน';
+const fRow=(ic,t,r,sub)=>`<div class="ios-row"><span>${ic} ${t}${sub?`<small class="block text-xs text-slate-500 dark:text-slate-400">${sub}</small>`:''}</span><span class="flex items-center gap-1.5">${r}</span></div>`;
+const fPill=(k,t)=>`<button type="button" class="ios-pill ${F.open===k?'act':''}" onclick="fOpen('${k}')" aria-expanded="${F.open===k}">${esc(t)}</button>`;
+const swH=(k,on,n)=>`<input type="checkbox" class="sw" role="switch" ${on?'checked':''} onchange="fSw('${k}',this.checked)" aria-label="${n}">`;
+function fDP(k){
+  const y=F.py,m=F.pm,lead=new Date(y,m,1).getDay(),t=todayStr();
+  const qs={due:[['วันนี้','fQ(0)'],['พรุ่งนี้','fQ(1)'],['+3 วัน','fQ(3)'],['+7 วัน','fQ(7)']],we:[['2 วัน','fSpan(2)'],['3 วัน','fSpan(3)'],['5 วัน','fSpan(5)'],['ถึงวันส่งงาน','fSpan(0)']]}[k]||[['วันนี้',`fPick('${k}','${t}')`]];
+  let g=WD.map((w,i)=>`<div class="text-xs py-1 ${i?'text-slate-400':'text-red-500'}">${w}</div>`).join('');
+  for(let c=0;c<42;c++){const d=new Date(y,m,c-lead+1);if(c>=35&&d.getMonth()!==m)break;const ds=fmt(d.getFullYear(),d.getMonth(),d.getDate());
+    g+=`<button type="button" class="dp-d ${d.getMonth()!==m?'out':''} ${ds===t?'today':''} ${d.getDay()===0||holName(ds)?'sun':''} ${ds===F[k]?'sel':''}" title="${esc(holName(ds))}" onclick="fPick('${k}','${ds}')">${d.getDate()}</button>`}
+  return `<div class="dp"><div class="flex items-center justify-between mb-1"><b>${new Date(y,m,1).toLocaleDateString('th-TH',{month:'long',year:'numeric'})}</b><span><button type="button" class="btn !py-1" onclick="fNav(-1)" aria-label="เดือนก่อน">‹</button> <button type="button" class="btn !py-1" onclick="fNav(1)" aria-label="เดือนถัดไป">›</button></span></div><div class="dp-grid">${g}</div><div class="flex flex-wrap gap-1 mt-2">${qs.map(([a,b])=>`<button type="button" class="chip" onclick="${b}">${a}</button>`).join('')}</div></div>`}
+function fTP(){
+  const [h,m]=(F.time||'09:00').split(':'),mins=[...new Set([...Array(12).keys()].map(x=>pad(x*5)).concat(m))].sort();
+  return `<div class="dp flex flex-wrap items-center gap-2"><select id="tpH" class="inp !w-auto" onchange="fTime()" aria-label="ชั่วโมง">${[...Array(24).keys()].map(x=>`<option ${pad(x)===h?'selected':''}>${pad(x)}</option>`).join('')}</select>:<select id="tpM" class="inp !w-auto" onchange="fTime()" aria-label="นาที">${mins.map(x=>`<option ${x===m?'selected':''}>${x}</option>`).join('')}</select>${['09:00','12:00','15:00','17:00','18:00'].map(t=>`<button type="button" class="chip" onclick="fT('${t}')">${t}</button>`).join('')}</div>`}
+function fHint(){
+  const p=[];
+  if(F.noDate)p.push('⏳ งานนี้จะขึ้นเตือนเป็นงานค้างจนกว่าจะกำหนดวันส่ง');
+  else if(F.due){const d=Math.round((new Date(F.due+'T00:00:00')-new Date(todayStr()+'T00:00:00'))/864e5),wd=new Date(F.due+'T00:00:00').getDay();
+    p.push('🏁 ส่ง'+longDate(F.due)+(F.hasTime?' เวลา '+F.time+' น.':'')+' · '+(d<0?'เลยมา '+(-d)+' วัน':d===0?'วันนี้':'อีก '+d+' วัน'));
+    if(holName(F.due))p.push('⚠ วันส่งตรงกับวันหยุด: '+holName(F.due));else if(wd===0||wd===6)p.push('⚠ วันส่งตรงกับวัน'+(wd?'เสาร์':'อาทิตย์'))}
+  if(F.multi&&F.ws&&F.we){if(F.we<F.ws)p.push('⚠ วันสิ้นสุดต้องไม่ก่อนวันเริ่ม');else{p.push('🛠 ทำงาน '+rangeText({workStart:F.ws,workEnd:F.we}));if(F.due&&!F.noDate&&F.we>F.due)p.push('⚠ ช่วงทำงานสิ้นสุดหลังวันส่งงาน')}}
+  return p.map(x=>`<div>${esc(x)}</div>`).join('');
 }
-function setSpan(n){if(!$('workStart').value)$('workStart').value=todayStr();$('workEnd').value=addDays($('workStart').value,n-1);updateMultiHint()}
-function endAtDelivery(){
-  const dd=$('noDeliveryDate').checked?'':$('deliveryDate').value;
-  if(!dd)return toast('ยังไม่ได้เลือกวันส่งงาน','err');
-  if(!$('workStart').value)$('workStart').value=$('receiveDate').value||todayStr();
-  $('workEnd').value=dd;updateMultiHint();
+function fRender(){
+  let h=fRow('📥','วันรับงาน',fPill('recv',fLbl(F.recv)))+(F.open==='recv'?fDP('recv'):'')+fRow('⏳','ไม่กำหนดวันส่ง',swH('noDate',F.noDate,'ไม่กำหนดวันส่ง'),'ระบบจะเตือนเป็นงานค้างจนกว่าจะกำหนดวัน');
+  if(!F.noDate)h+=fRow('🏁','วันส่งงาน',fPill('due',fLbl(F.due))+(F.hasTime?fPill('time',F.time):''))+(F.open==='due'?fDP('due'):'')+(F.open==='time'?fTP():'')+fRow('⏰','ระบุเวลาส่ง',swH('time',F.hasTime,'ระบุเวลาส่ง'));
+  h+=fRow('🛠','ทำงานหลายวัน',swH('multi',F.multi,'ทำงานหลายวัน'));
+  if(F.multi)h+=fRow('▶️','เริ่มทำงาน',fPill('ws',fLbl(F.ws)))+(F.open==='ws'?fDP('ws'):'')+fRow('⏹','ทำงานถึง',fPill('we',fLbl(F.we)))+(F.open==='we'?fDP('we'):'');
+  $('dateGroup').innerHTML='<div class="ios-group">'+h+'</div><div class="text-xs mt-2 text-slate-600 dark:text-slate-300 space-y-0.5">'+fHint()+'</div>';
 }
-function updateMultiHint(){
-  const el=$('multiHint');if(!el)return;
-  const on=$('multiDay').checked,s=$('workStart').value,e=$('workEnd').value;
-  let msg='',cls='text-slate-600 dark:text-slate-300';
-  if(on&&s&&e){
-    if(e<s){msg='⚠ วันสิ้นสุดต้องไม่ก่อนวันเริ่มทำงาน';cls='text-red-600 dark:text-red-400'}
-    else{
-      const total=spanDays(s,e);msg='🛠 รวม '+total+' วัน';
-      let h=0,k=0,ds=s;while(ds<=e&&k<400){k++;if(holName(ds))h++;ds=addDays(ds,1)}
-      if(h)msg+=' · มีวันหยุดนักขัตฤกษ์ '+h+' วัน';
-      const dd=$('noDeliveryDate').checked?'':$('deliveryDate').value;
-      if(dd&&e>dd){msg+=' · ⚠ สิ้นสุดหลังวันส่งงาน';cls='text-amber-700 dark:text-amber-300'}
-    }
-  }
-  el.textContent=msg;el.className='text-xs font-normal mt-1.5 '+cls+(msg?'':' hidden');
+function fOpen(k){F.open=F.open===k?'':k;if(F.open&&k!=='time'){const b=F[k]||F.due||todayStr();F.py=+b.slice(0,4);F.pm=+b.slice(5,7)-1}fRender()}
+function fNav(n){F.pm+=n;if(F.pm<0){F.pm=11;F.py--}if(F.pm>11){F.pm=0;F.py++}fRender()}
+function fPick(k,ds){F[k]=ds;if(k==='ws'&&F.we<ds)F.we=ds;if(k==='we'&&F.ws>ds)F.ws=ds;F.open='';fRender()}
+function fQ(n){F.due=addDays(todayStr(),n);F.open='';fRender()}
+function fSpan(n){if(!F.ws)F.ws=F.recv;F.we=n?addDays(F.ws,n-1):(F.due&&!F.noDate&&F.due>=F.ws?F.due:F.ws);F.open='';fRender()}
+function fTime(){F.time=$('tpH').value+':'+$('tpM').value;fRender()}
+function fT(t){F.time=t;fRender()}
+function fSw(k,v){
+  if(k==='noDate'){F.noDate=v?1:0;F.open=v?'':'due'}
+  if(k==='time'){F.hasTime=v?1:0;if(v&&!F.time)F.time='09:00';F.open=v?'time':''}
+  if(k==='multi'){F.multi=v?1:0;if(v){F.ws=F.ws||F.recv||todayStr();F.we=F.we||((F.due&&!F.noDate&&F.due>=F.ws)?F.due:F.ws)}F.open=''}
+  if(F.open==='due'){const b=F.due||todayStr();F.py=+b.slice(0,4);F.pm=+b.slice(5,7)-1}
+  fRender();
 }
-function quickDue(n){$('noDeliveryDate').checked=false;syncNoDate();const d=new Date(todayStr()+'T00:00:00');d.setDate(d.getDate()+n);$('deliveryDate').value=fmt(d.getFullYear(),d.getMonth(),d.getDate());updateDateHint()}
 function pickMark(k){$('markVal').value=k;renderMarkPick()}
 function renderMarkPick(){
   const cur=$('markVal').value;
   $('markPick').innerHTML=`<button type="button" class="mpick ${!cur?'on':''}" onclick="pickMark('')">ไม่มี</button>`
     +Object.keys(MARKS).map(k=>`<button type="button" class="mpick ${cur===k?'on':''}" style="--c:${MARKS[k]}" onclick="pickMark('${k}')" aria-pressed="${cur===k}"><span class="dot"></span>${esc(mLabel(k))}</button>`).join('');
 }
-function openForm(id,presetDate){
+function openForm(id,presetDate,_x,openRow){
   const i=id?data.find(x=>x.id===id):null;
   $('editId').value=id||'';
   $('formTitle').textContent=i?'แก้ไขงาน':'เพิ่มงานใหม่';
   $('customerName').value=i?.customer||'';
-  $('receiveDate').value=i?.receiveDate||todayStr();
-  $('noDeliveryDate').checked=!!i?.noDate;
-  $('deliveryDate').value=i?.date||(!i&&presetDate)||'';
-  $('deliveryTime').value=i?.time||'';
+  Object.assign(F,{recv:i?.receiveDate||todayStr(),noDate:i?.noDate?1:0,due:i?.date||(!i&&presetDate)||'',time:i?.time||'',hasTime:i?.time?1:0,multi:i?.workStart?1:0,ws:i?.workStart||'',we:i?.workEnd||'',open:''});
+  if(openRow==='due'){F.noDate=0;F.open='due';const b=F.due||todayStr();F.py=+b.slice(0,4);F.pm=+b.slice(5,7)-1}
+  fRender();
   $('deliveryStatus').value=i?.status||STATUSES[1];
   $('priority').value=i?.priority||'normal';
   $('deliveryDetails').value=i?.details||'';
   $('reviewerFeedback').value=i?.feedback||'';
-  $('multiDay').checked=!!i?.workStart;$('workStart').value=i?.workStart||'';$('workEnd').value=i?.workEnd||'';applyMulti();
-  $('markVal').value=i?.mark||markFilter||'';
+  $('markVal').value=i?.mark||(!i&&markFilter)||'';
   renderMarkPick();
-  syncNoDate();
   $('formModal').classList.remove('hidden');
-  setTimeout(()=>$('customerName').focus(),50);
+  if(!openRow)setTimeout(()=>$('customerName').focus(),50);
 }
 function closeForm(){$('formModal').classList.add('hidden')}
 
 async function saveItem(){
-  const noDate=$('noDeliveryDate').checked;
-  const item={customer:$('customerName').value.trim(),receiveDate:$('receiveDate').value,noDate,date:noDate?'':$('deliveryDate').value,time:noDate?'':$('deliveryTime').value,status:$('deliveryStatus').value,priority:$('priority').value,mark:$('markVal').value,workStart:'',workEnd:'',details:$('deliveryDetails').value.trim(),feedback:$('reviewerFeedback').value.trim()};
+  const noDate=!!F.noDate;
+  const item={customer:$('customerName').value.trim(),receiveDate:F.recv,noDate,date:noDate?'':F.due,time:(noDate||!F.hasTime)?'':F.time,status:$('deliveryStatus').value,priority:$('priority').value,mark:$('markVal').value,workStart:'',workEnd:'',details:$('deliveryDetails').value.trim(),feedback:$('reviewerFeedback').value.trim()};
   if(!item.customer||!item.receiveDate)return toast('กรอกชื่อลูกค้าและวันรับงาน','err');
-  if(!noDate&&!item.date)return toast('เลือกวันส่ง หรือติ๊ก “ไม่กำหนด”','err');
-  if($('multiDay').checked){
-    const ws=$('workStart').value,we=$('workEnd').value;
-    if(!ws||!we)return toast('กรอกวันเริ่มและวันสิ้นสุดการทำงาน หรือเอาติ๊ก “ทำงานหลายวัน” ออก','err');
-    if(we<ws)return toast('วันสิ้นสุดการทำงานต้องไม่ก่อนวันเริ่ม','err');
-    item.workStart=ws;item.workEnd=we;
-  }
+  if(!noDate&&!item.date){F.open='due';fRender();return toast('เลือกวันส่ง หรือเปิด “ไม่กำหนดวันส่ง”','err')}
+  if(F.multi){if(!F.ws||!F.we||F.we<F.ws)return toast('ช่วงทำงานไม่ถูกต้อง (วันสิ้นสุดต้องไม่ก่อนวันเริ่ม)','err');item.workStart=F.ws;item.workEnd=F.we}
   const id=$('editId').value;const now=new Date().toISOString();
   $('saveBtn').disabled=true;
   const ok=await mutate(()=>{
@@ -673,6 +677,44 @@ async function saveItem(){
   },id?'อัปเดตแล้ว':'เพิ่มงานแล้ว');
   $('saveBtn').disabled=false;
   if(ok){closeForm();if(item.date&&view==='calendar')pickDay(item.date)}
+}
+
+/* ---------- AI ช่วยเพิ่มงานจากข้อความ (Gemini) ---------- */
+let aiPending=[];
+const saveAI=()=>{localStorage.ai_key=$('aiKey').value.trim();localStorage.ai_model=$('aiModel').value.trim()};
+const fixD=s=>{s=String(s||'');const y=+s.slice(0,4);if(y>2400)s=(y-543)+s.slice(4);const d=new Date(s+'T00:00:00');return /^\d{4}-\d{2}-\d{2}$/.test(s)&&!isNaN(d)&&fmt(d.getFullYear(),d.getMonth(),d.getDate())===s?s:''};
+function cleanTask(t){
+  const date=t.noDate?'':fixD(t.date),ws=fixD(t.workStart),we=fixD(t.workEnd),tm=/^([01]\d|2[0-3]):[0-5]\d$/.test(t.time||'')?t.time:'';
+  const r={customer:String(t.customer||'').trim().slice(0,80),receiveDate:fixD(t.receiveDate)||todayStr(),noDate:!date,date,time:date?tm:'',status:STATUSES[0],priority:t.priority==='high'?'high':'normal',mark:MARKS[t.mark]?t.mark:'',workStart:'',workEnd:'',details:String(t.details||'').trim().slice(0,1000),feedback:''};
+  if(ws&&we&&we>=ws){r.workStart=ws;r.workEnd=we}
+  return r.customer?r:null;
+}
+async function callAI(text){
+  const key=localStorage.ai_key;if(!key)throw new Error('ยังไม่ได้ใส่ Gemini API Key ที่ ⚙️ ตั้งค่า');
+  const sys=`คุณเป็นผู้ช่วยจัดคิวงาน วันนี้คือ ${todayStr()} (วัน${WD[new Date().getDay()]}) ปี พ.ศ. = ค.ศ.+543 ให้แปลงวันที่ทุกแบบเป็น ค.ศ. รูป YYYY-MM-DD ถ้าไม่ระบุเดือน/ปีให้ใช้วันที่ในอนาคตที่ใกล้ที่สุด คำว่า "บันทึก" ที่นำหน้าเป็นเพียงคำสั่ง ให้แยกงานทุกชิ้นในข้อความ ถ้าไม่ระบุวันส่งให้ date เป็น "" ตอบเป็น JSON เท่านั้น: {"tasks":[{"customer":"ชื่อลูกค้า/ชิ้นงานสั้นๆ","receiveDate":"YYYY-MM-DD (ไม่ระบุ=วันนี้)","date":"วันส่ง","time":"HH:MM หรือ \\"\\"","workStart":"","workEnd":"(เฉพาะเมื่อบอกช่วงทำงานหลายวัน)","priority":"high ถ้าด่วน ไม่เช่นนั้น normal","mark":"เลือก key จาก ${Object.keys(MARKS).map(k=>k+'='+mLabel(k)).join(', ')} หรือ \\"\\"","details":"รายละเอียดที่เหลือ"}]}`;
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(localStorage.ai_model||'gemini-2.5-flash')+':generateContent',{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':key},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:'user',parts:[{text}]}],generationConfig:{responseMimeType:'application/json',temperature:.1}})});
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error?.message||'AI ผิดพลาด (HTTP '+r.status+')');
+  const raw=(j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('').replace(/```json|```/g,'').trim();
+  const o=JSON.parse(raw);return(Array.isArray(o)?o:o.tasks||[]).map(cleanTask).filter(Boolean);
+}
+const aiWarn=t=>t.date&&t.date<todayStr();
+async function aiRun(){
+  const text=$('aiText').value.trim();if(!text)return toast('พิมพ์ข้อความก่อน','err');
+  const b=$('aiBtn');b.disabled=true;b.textContent='⏳ กำลังวิเคราะห์…';
+  try{aiPending=await callAI(text);if(!aiPending.length)throw new Error('AI ไม่พบงานในข้อความนี้');
+    if($('aiAuto').checked&&!aiPending.some(aiWarn))await aiAdd();else aiShow()}
+  catch(e){$('aiResult').innerHTML='';toast(e.message||'วิเคราะห์ไม่สำเร็จ','err')}
+  finally{b.disabled=false;b.textContent='✨ วิเคราะห์และเพิ่มลงปฏิทิน'}
+}
+function aiShow(){
+  if(!aiPending.length){$('aiResult').innerHTML='';return}
+  $('aiResult').innerHTML=`<div class="ios-group mt-3">${aiPending.map((t,k)=>`<div class="ios-row"><div class="min-w-0"><b>${t.priority==='high'?'🔺 ':''}${esc(t.customer)}</b><div class="text-xs text-slate-500 dark:text-slate-400">📥 ${esc(fLbl(t.receiveDate,1))} → ${t.noDate?'⏳ ไม่กำหนดวันส่ง':'🏁 '+esc(fLbl(t.date,1))+(t.time?' · '+t.time+' น.':'')}${t.workStart?' · 🛠 '+esc(rangeText(t)):''}</div>${t.details?`<div class="text-xs opacity-70 truncate">${esc(t.details.slice(0,100))}</div>`:''}${aiWarn(t)?'<div class="text-xs text-amber-600 dark:text-amber-300">⚠ วันส่งผ่านมาแล้ว ตรวจสอบก่อนเพิ่ม</div>':''}</div><button class="btn !py-1 text-xs" onclick="aiPending.splice(${k},1);aiShow()" aria-label="ไม่เพิ่มงานนี้">✕</button></div>`).join('')}</div>
+    <div class="flex gap-2 mt-2"><button onclick="aiAdd()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">เพิ่ม ${aiPending.length} งานลงปฏิทิน</button><button onclick="aiPending=[];aiShow()" class="btn">ยกเลิก</button></div>`;
+}
+async function aiAdd(){
+  const items=aiPending.slice(),now=new Date().toISOString();if(!items.length)return;
+  const ok=await mutate(()=>{data.unshift(...items.map(t=>({id:uid(),...t,updatedAt:now,approvedAt:''})))},'AI เพิ่ม '+items.length+' งานลงปฏิทินแล้ว');
+  if(ok){aiPending=[];$('aiResult').innerHTML='';$('aiText').value='';const f=items.find(t=>t.date);if(f&&view==='calendar')pickDay(f.date)}
 }
 
 /* ---------- actions ---------- */
